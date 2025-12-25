@@ -3,7 +3,7 @@ package example.ru.freeslotbottg.database.service.impl;
 import example.ru.freeslotbottg.database.model.ProfessionModel;
 import example.ru.freeslotbottg.database.repo.ProfessionRepo;
 import example.ru.freeslotbottg.database.service.profesion.GetAllProfession;
-import example.ru.freeslotbottg.database.service.profesion.GetIdByProfession;
+import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.profesion.SetProfession;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class ProfessionServiceImpl implements GetAllProfession, GetIdByProfession, SetProfession {
+public class ProfessionServiceImpl implements GetAllProfession, GetByProfession, SetProfession {
     private ProfessionRepo professionRepo;
 
     @Override
@@ -21,8 +21,8 @@ public class ProfessionServiceImpl implements GetAllProfession, GetIdByProfessio
     }
 
     @Override
-    public ProfessionModel getIdByProfession(String profession) {
-        return professionRepo.getIdByProfession(profession);
+    public ProfessionModel getByProfession(String profession) {
+        return professionRepo.getByProfession(profession);
     }
 
     @Override

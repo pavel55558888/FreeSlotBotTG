@@ -2,7 +2,7 @@ package example.ru.freeslotbottg.bot;
 
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
-import example.ru.freeslotbottg.database.service.profesion.GetIdByProfession;
+import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
@@ -26,7 +26,7 @@ import java.util.List;
 public class CallbackHandler {
 
     private final KeyboardFactory keyboardFactory;
-    private final GetIdByProfession getIdByProfession;
+    private final GetByProfession getByProfession;
     private final GetStaffByProfessionId getStaffByProfessionId;
     private final GetStaffByFirstNameAndLastName getStaffByFirstNameAndLastName;
     private final GetAllSlotsByStaff getAllSlotsByStaff;
@@ -65,8 +65,8 @@ public class CallbackHandler {
 
             List<String> masters = getStaffByProfessionId
                     .getStaffByProfessionId(
-                            getIdByProfession
-                                    .getIdByProfession(value)
+                            getByProfession
+                                    .getByProfession(value)
                                     .getId()
                     )
                     .stream()

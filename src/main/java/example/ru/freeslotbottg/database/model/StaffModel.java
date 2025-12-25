@@ -14,17 +14,22 @@ public class StaffModel {
     @Id
     @GeneratedValue
     private long id;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private ProfessionModel profession;
     @Column(nullable = false)
     private String firstName;
     @Column(nullable = false)
     private String lastName;
+    @Column(nullable = false)
+    private String username;
+    @Column(nullable = true)
+    private long chatId;
 
-    public StaffModel(ProfessionModel profession, String firstName, String lastName) {
+    public StaffModel(ProfessionModel profession, String firstName, String lastName, String username) {
         this.profession = profession;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.username = username;
     }
 
     @Override

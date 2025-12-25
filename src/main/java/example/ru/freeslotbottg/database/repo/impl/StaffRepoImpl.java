@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
@@ -40,5 +41,14 @@ public class StaffRepoImpl implements StaffRepo {
                 .stream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public Optional<StaffModel> getStaffByUsername(String username) {
+        return entityManager.createQuery("from StaffModel where username = :username", StaffModel.class)
+                .setParameter("username", username)
+                .getResultList()
+                .stream()
+                .findFirst();
     }
 }

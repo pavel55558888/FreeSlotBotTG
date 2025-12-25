@@ -5,7 +5,7 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-!**/src/main/resources/application.properites
+src/main/resources/application.properties
 # Project exclude paths
 /.gradle/
 /build/

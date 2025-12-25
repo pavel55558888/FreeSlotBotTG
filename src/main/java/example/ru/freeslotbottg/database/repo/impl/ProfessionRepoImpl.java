@@ -19,7 +19,7 @@ public class ProfessionRepoImpl implements ProfessionRepo {
     }
 
     @Override
-    public ProfessionModel getIdByProfession(String profession) {
+    public ProfessionModel getByProfession(String profession) {
         return entityManager.createQuery(
                         "SELECT p FROM ProfessionModel p WHERE p.profession_type = :professionType",
                         ProfessionModel.class

@@ -1,0 +1,12 @@
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/main/resources/application.properites
+# Project exclude paths
+/.gradle/
+/build/
+/build/classes/java/main/

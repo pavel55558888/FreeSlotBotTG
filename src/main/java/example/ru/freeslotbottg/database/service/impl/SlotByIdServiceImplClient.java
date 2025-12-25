@@ -8,11 +8,14 @@ import example.ru.freeslotbottg.database.service.slots.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class SlotByIdServiceImpl implements SetSlot, GetAllSlotsByStaff, GetSlotById, UpdateSlot, GetSlotsByUsername, GetAllSlotsNotAvailable, DeleteSlotById {
+public class SlotByIdServiceImplClient implements SetSlot, GetAllSlotsByStaff, GetSlotById, UpdateSlot,
+        GetSlotsByUsernameClient, GetAllSlotsNotAvailable, DeleteSlotById {
     private SlotRepo slotRepo;
 
     @Override

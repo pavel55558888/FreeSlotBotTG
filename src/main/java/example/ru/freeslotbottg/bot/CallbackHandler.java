@@ -3,6 +3,7 @@ package example.ru.freeslotbottg.bot;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
+import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
@@ -32,6 +33,7 @@ public class CallbackHandler {
     private final GetAllSlotsByStaff getAllSlotsByStaff;
     private final GetSlotById getSlotById;
     private final UpdateSlot updateSlot;
+    private final DeleteSlotById deleteSlotById;
 
     public List<BotApiMethod<?>> handle(CallbackQuery query) {
         String data = query.getData();
@@ -111,10 +113,10 @@ public class CallbackHandler {
                         .text("Нет свободных слотов у этого мастера.")
                         .build());
             } else {
-                InlineKeyboardMarkup keyboard = keyboardFactory.buildSlotKeyboard(slots, "slot", true);
+                InlineKeyboardMarkup keyboard = keyboardFactory.buildSlotKeyboard(slots, "slot", true, false);
                 actions.add(SendMessage.builder()
                         .chatId(chatId)
-                        .text("Выберите свободный слот:")
+                        .text("Выберите слот:")
                         .replyMarkup(keyboard)
                         .build());
             }
@@ -135,6 +137,19 @@ public class CallbackHandler {
                                 "Мастер: <b>" + slot.getStaffModel() + "</b>\n" +
                                 "Дата и время: <b>" + slot.getDate() + " " + slot.getTime() + "</b>\n" +
                                 "За день до записи отправим вам уведомление")
+                        .parseMode("HTML")
+                        .build());
+
+                actions.add(SendMessage.builder()
+                        .chatId(slot.getStaffModel().getChatId())
+                        .text(
+                                "🔔 <b>К вам новая запись!</b>\n" +
+                                "\n" +
+                                "👤 <b>Клиент:</b> " + query.getFrom().getFirstName() + "\n" +
+                                "🔖 <b>Telegram:</b> @" + query.getFrom().getUserName() + "\n" +
+                                "📅 <b>Дата:</b> " + slot.getDate() + "\n" +
+                                "⏰ <b>Время:</b> " + slot.getTime() + "\n"
+                        )
                         .parseMode("HTML")
                         .build());
             } else {
@@ -166,6 +181,14 @@ public class CallbackHandler {
                             "Мастер: <b>" + slot.getStaffModel() + "</b>\n" +
                             "Дата и время: <b>" + slot.getDate() + " " + slot.getTime() + "</b>\n")
                     .parseMode("HTML")
+                    .build());
+        } else if ("delete".equals(action)) {
+
+            deleteSlotById.deleteSlot(Long.parseLong(value));
+            actions.add(EditMessageText.builder()
+                    .chatId(chatId)
+                    .messageId(messageId)
+                    .text("Слот успешно удален")
                     .build());
         }
 

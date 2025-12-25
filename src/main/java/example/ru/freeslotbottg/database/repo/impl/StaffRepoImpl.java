@@ -51,4 +51,9 @@ public class StaffRepoImpl implements StaffRepo {
                 .stream()
                 .findFirst();
     }
+
+    @Override
+    public void updateStaff(StaffModel staff) {
+        entityManager.merge(staff);
+    }
 }

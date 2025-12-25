@@ -25,7 +25,10 @@ public class ProfessionRepoImpl implements ProfessionRepo {
                         ProfessionModel.class
                 )
                 .setParameter("professionType", profession)
-                .getSingleResult();
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

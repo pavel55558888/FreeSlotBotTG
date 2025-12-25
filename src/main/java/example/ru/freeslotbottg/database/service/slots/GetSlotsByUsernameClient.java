@@ -4,6 +4,6 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 
 import java.util.List;
 
-public interface GetSlotsByUsername {
+public interface GetSlotsByUsernameClient {
     public List<SlotModel> getSlotsByUsername(String username);
 }

@@ -36,8 +36,9 @@ public class KeyboardFactory {
                                     ? slot.getDate() + " " + slot.getTime()
                                     : slot.getStaffModel().getProfession().getProfession_type() + " "
                                     + slot.getDate() + " " + slot.getTime() + "\n"
-                                    + (status ? (slot.isAvailable() ? "Свободно" : "Занято") : null);
+                                    + (status ? (slot.isAvailable() ? "Свободно" : "Занято") : "");
                     String callbackData = prefix + ":" + slot.getId();
+
                     return InlineKeyboardButton.builder()
                             .text(display)
                             .callbackData(callbackData)

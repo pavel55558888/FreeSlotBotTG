@@ -4,14 +4,13 @@ import example.ru.freeslotbottg.database.model.ProfessionModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.repo.ProfessionRepo;
+import example.ru.freeslotbottg.database.service.profesion.DeleteProfession;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.profesion.SetProfession;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.GetSlotsByUsernameClient;
 import example.ru.freeslotbottg.database.service.slots.SetSlot;
-import example.ru.freeslotbottg.database.service.staff.GetStaffByUsername;
-import example.ru.freeslotbottg.database.service.staff.SetStaff;
-import example.ru.freeslotbottg.database.service.staff.UpdateStaff;
+import example.ru.freeslotbottg.database.service.staff.*;
 import example.ru.freeslotbottg.enums.AdminEnum;
 import example.ru.freeslotbottg.enums.MasterEnum;
 import example.ru.freeslotbottg.enums.StartEnums;
@@ -42,6 +41,9 @@ public class MessageHandler {
     private final GetStaffByUsername getStaffByUsername;
     private final UpdateStaff updateStaff;
     private final GetAllSlotsByStaff getAllSlotsByStaff;
+    private final DeleteStaff deleteStaff;
+    private final DeleteProfession deleteProfession;
+    private final GetStaffByProfessionId getStaffByProfessionId;
 
     @Value("${bot.admin}")
     private String admin;
@@ -53,6 +55,7 @@ public class MessageHandler {
         String username = update.getMessage().getFrom().getUserName();
 
         if ("/start".equals(text)) {
+            log.info("Command /start");
             SendMessage welcome = SendMessage.builder()
                     .chatId(chatId)
                     .text(StartEnums.START_MESSAGE.format(firstName))
@@ -66,6 +69,7 @@ public class MessageHandler {
 
             return Arrays.asList(welcome, choice);
         } else if ("/my_slots".equals(text)) {
+            log.info("Command /my_slots");
             List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(username);
 
             if (slots.isEmpty()) {
@@ -82,6 +86,7 @@ public class MessageHandler {
             }
             return actions;
         } else if("/canceled_slot".equals(text)) {
+            log.info("Command /cancel_slot");
             List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(username);
 
             if (slots.isEmpty()) {
@@ -99,13 +104,15 @@ public class MessageHandler {
             /***
              * /admin/new/master/профессия/username/firstname/lastname
              */
+            log.info("Command /admin/new/master/**");
+
             if (!username.equals(admin)) {
                 buildMessage("Данной команды не существует", chatId);
             }
 
             try {
                 String[] url = text.split("/");
-                url[4] = url[4].replace("@", "");
+                url[5] = url[5].replace("@", "");
 
                 Optional<ProfessionModel> professionModel = Optional.ofNullable(getByProfession.getByProfession(capitalize(url[4])));
                 if(professionModel.isEmpty()) {
@@ -120,12 +127,41 @@ public class MessageHandler {
                                 url[5]
                         ));
 
-                return buildMessage("Новый мастер успешно добавлен", chatId);
+                return buildMessage(
+                        (professionModel.isEmpty() ? "Новый вид деятельности успешно добавлен\n" : "")
+                                + "Новый мастер успешно добавлен", chatId);
             }catch (Exception e) {
                 log.error("Ошибка при добавление нового мастер:\n" + e.getMessage());
                 return buildMessage("Неизвестная ошибка: формат /admin/new/master/профессия/username/firstname/lastname", chatId);
             }
+        } else if(text.startsWith("/admin/delete/master/")) {
+            /***
+             * /admin/delete/master/username
+             */
+            log.info("Command /admin/delete/master/*");
+
+            if (!username.equals(admin)) {
+                return buildMessage("Данной команды не существует", chatId);
+            }
+            String usernameStaff = text.split("/")[4].replace("@", "");
+            Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(usernameStaff);
+
+            if(staffModel.isEmpty()) {
+                return buildMessage("Мастер не найден", chatId);
+            }
+
+            deleteStaff.deleteStaff(staffModel.get().getId());
+
+            List<StaffModel> staffListByProfession = getStaffByProfessionId.getStaffByProfessionId(staffModel.get().getProfession().getId());
+
+            if (staffListByProfession.isEmpty()) {
+                deleteProfession.deleteProfession(staffModel.get().getProfession().getId());
+            }
+            return buildMessage((staffListByProfession.isEmpty()
+                    ? "Вид деятельности успешно удален\n" : "") + "Мастер успешно удален", chatId);
+
         } else if(text.equals("/slot/all")){
+            log.info("Command /slot/all");
             Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
             if (staffModel.isEmpty()) {
@@ -141,10 +177,11 @@ public class MessageHandler {
             SendMessage choice = SendMessage.builder()
                     .chatId(chatId)
                     .text("Ваши слоты:")
-                    .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "none", true, true))
+                    .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "check_slot", true, true))
                     .build();
             return Collections.singletonList(choice);
         } else if (text.equals("/slot/delete")) {
+            log.info("Command /slot/delete");
             Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
             if (staffModel.isEmpty()) {
@@ -167,6 +204,8 @@ public class MessageHandler {
             /***
              * /slot/YYYY-MM-DD/HH:mm
              */
+            log.info("Command /slot/*/*");
+
             String[] url = text.split("/");
             Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
@@ -192,6 +231,8 @@ public class MessageHandler {
             }
             return buildMessage("Новый слот успешно добавлен", chatId);
         } else if("/master".equals(text)){
+            log.info("Command /master");
+
             List<BotApiMethod<?>> actions = new ArrayList<>();
             Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
             
@@ -215,6 +256,8 @@ public class MessageHandler {
 
             return actions;
         } else if("/admin".equals(text)){
+            log.info("Command /admin");
+
             if (!username.equals(admin)) {
                 return buildMessage("Данной команды не существует", chatId);
             }

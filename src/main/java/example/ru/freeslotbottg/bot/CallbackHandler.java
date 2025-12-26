@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -160,29 +161,61 @@ public class CallbackHandler {
                         .build());
             }
         }else if ("canceled".equals(action)) {
-            SlotModel slot = getSlotById.getSlotById(Long.parseLong(value));
-            if (slot == null){
+            Optional<SlotModel> slot = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
+            if (slot.isEmpty()){
                 actions.add(EditMessageText.builder()
                         .chatId(chatId)
                         .messageId(messageId)
                         .text("Ошибка сервера: запись не найдена")
                         .build());
+                return actions;
             }
-            slot.setAvailable(true);
-            slot.setChatId(0);
-            slot.setUsernameClient(null);
+            String userNameClint = slot.get().getUsernameClient();
+            slot.get().setAvailable(true);
+            slot.get().setChatId(0);
+            slot.get().setUsernameClient(null);
 
-            updateSlot.updateSlot(slot);
+            updateSlot.updateSlot(slot.get());
 
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
                     .text("Ваша запись успешно отменена\n" +
-                            "Мастер: <b>" + slot.getStaffModel() + "</b>\n" +
-                            "Дата и время: <b>" + slot.getDate() + " " + slot.getTime() + "</b>\n")
+                            "👤 Мастер: <b>" + slot.get().getStaffModel() + "</b>\n" +
+                            "📅 Дата: <b>" + slot.get().getDate() + "</b>\n" +
+                            "⏰ Время: <b>" + slot.get().getTime() + "</b>\n")
+                    .parseMode("HTML")
+                    .build());
+
+            actions.add(SendMessage.builder()
+                    .chatId(slot.get().getStaffModel().getChatId())
+                    .text("Клиент отменил запись:\n" +
+                            "📅 Дата: <b>" + slot.get().getDate() + "</b>\n" +
+                            "⏰ Время: <b>" + slot.get().getTime() + "</b>\n" +
+                            "🔖 Telegram: @<b>" + userNameClint + "</b>\n")
                     .parseMode("HTML")
                     .build());
         } else if ("delete".equals(action)) {
+            Optional<SlotModel> slot = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
+            if (slot.isEmpty()){
+                actions.add(EditMessageText.builder()
+                        .chatId(chatId)
+                        .messageId(messageId)
+                        .text("Ошибка сервера: запись не найдена")
+                        .build());
+                return actions;
+            }
+
+            if (!slot.get().isAvailable()) {
+                actions.add(SendMessage.builder()
+                        .chatId(slot.get().getChatId())
+                        .text("Слот на который вы были записаны удалили, выберите новый слот, пожалуйста.\n\n" +
+                                "👤 Мастер: <b>" + slot.get().getStaffModel() + "</b>\n" +
+                                "📅 Дата: <b>" + slot.get().getDate() + "</b>\n" +
+                                "⏰ Время: <b>" + slot.get().getTime() + "</b>\n")
+                                .parseMode("HTML")
+                        .build());
+            }
 
             deleteSlotById.deleteSlot(Long.parseLong(value));
             actions.add(EditMessageText.builder()
@@ -190,6 +223,37 @@ public class CallbackHandler {
                     .messageId(messageId)
                     .text("Слот успешно удален")
                     .build());
+
+        } else if ("check_slot".equals(action)) {
+            Optional<SlotModel> slot = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
+
+            if (slot.isEmpty()) {
+                actions.add(SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Ошибка: такого слота не сууществует")
+                        .parseMode("HTML")
+                        .build());
+                return actions;
+            }
+
+            if (!slot.get().isAvailable()) {
+                actions.add(SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Подробная информация о слоте:\n" +
+                                "📅 Дата: <b>" + slot.get().getDate() + "</b>\n" +
+                                "⏰ Время: <b>" + slot.get().getTime() + "</b>\n" +
+                                "🔖 Telegram: @<b>" + slot.get().getUsernameClient() + "</b>\n")
+                        .parseMode("HTML")
+                        .build());
+            } else {
+                actions.add(SendMessage.builder()
+                        .chatId(chatId)
+                        .text("Свободный слот: \n" +
+                                "📅 Дата: <b>" + slot.get().getDate() + "</b>\n" +
+                                "⏰ Время: <b>" + slot.get().getTime() + "</b>\n")
+                        .parseMode("HTML")
+                        .build());
+            }
         }
 
         return actions;

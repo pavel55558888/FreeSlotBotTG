@@ -10,4 +10,5 @@ public interface ProfessionRepo {
     public List<ProfessionModel> getAllProfessions();
     public ProfessionModel getByProfession(String profession);
     public void setProfession(ProfessionModel professions);
+    public void deleteProfession(long id);
 }

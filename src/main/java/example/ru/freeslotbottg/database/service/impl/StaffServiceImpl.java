@@ -11,7 +11,8 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class StaffServiceImpl implements SetStaff, GetStaffByProfessionId, GetStaffByFirstNameAndLastName, GetStaffByUsername, UpdateStaff {
+public class StaffServiceImpl implements SetStaff, GetStaffByProfessionId, GetStaffByFirstNameAndLastName,
+        GetStaffByUsername, UpdateStaff, DeleteStaff {
     private StaffRepo staffRepo;
 
     @Override
@@ -37,5 +38,10 @@ public class StaffServiceImpl implements SetStaff, GetStaffByProfessionId, GetSt
     @Override
     public void updateStaff(StaffModel staff) {
         staffRepo.updateStaff(staff);
+    }
+
+    @Override
+    public void deleteStaff(long id) {
+        staffRepo.deleteStaff(id);
     }
 }

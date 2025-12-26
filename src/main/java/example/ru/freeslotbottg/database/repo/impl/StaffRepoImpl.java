@@ -56,4 +56,9 @@ public class StaffRepoImpl implements StaffRepo {
     public void updateStaff(StaffModel staff) {
         entityManager.merge(staff);
     }
+
+    @Override
+    public void deleteStaff(long id) {
+        entityManager.remove(entityManager.find(StaffModel.class, id));
+    }
 }

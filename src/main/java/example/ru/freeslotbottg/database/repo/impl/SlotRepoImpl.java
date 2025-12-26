@@ -52,8 +52,8 @@ public class SlotRepoImpl implements SlotRepo {
     }
 
     @Override
-    public List<SlotModel> getSlotsNotAvailable() {
-        return entityManager.createQuery("from SlotModel where isAvailable = false", SlotModel.class).getResultList();
+    public List<SlotModel> getSlots() {
+        return entityManager.createQuery("from SlotModel", SlotModel.class).getResultList();
     }
 
     @Override

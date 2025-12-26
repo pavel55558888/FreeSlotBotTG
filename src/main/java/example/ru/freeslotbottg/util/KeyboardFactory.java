@@ -33,10 +33,9 @@ public class KeyboardFactory {
                 .map(slot -> {
                     String display =
                             onlyDateAndTimeDisplay
-                                    ? slot.getDate() + " " + slot.getTime()
+                                    ? slot.getDate() + " " + slot.getTime() + (status ? (slot.isAvailable() ? " Свободно" : " Занято") : "")
                                     : slot.getStaffModel().getProfession().getProfession_type() + " "
-                                    + slot.getDate() + " " + slot.getTime() + "\n"
-                                    + (status ? (slot.isAvailable() ? "Свободно" : "Занято") : "");
+                                    + slot.getDate() + " " + slot.getTime() + "\n";
                     String callbackData = prefix + ":" + slot.getId();
 
                     return InlineKeyboardButton.builder()

@@ -4,6 +4,6 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 
 import java.util.List;
 
-public interface GetAllSlotsNotAvailable {
-    public List<SlotModel> getSlotsNotAvailable();
+public interface GetAllSlots {
+    public List<SlotModel> getSlots();
 }

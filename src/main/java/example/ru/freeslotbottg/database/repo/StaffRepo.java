@@ -14,4 +14,5 @@ public interface StaffRepo {
     public StaffModel getStaffByFirstNameAndLastName(String firstNameAndLastName);
     public Optional<StaffModel> getStaffByUsername(String username);
     public void updateStaff(StaffModel staff);
+    public void deleteStaff(long id);
 }

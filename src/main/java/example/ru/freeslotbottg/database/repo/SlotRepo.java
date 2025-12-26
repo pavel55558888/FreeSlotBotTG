@@ -4,8 +4,6 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -15,6 +13,6 @@ public interface SlotRepo {
     public SlotModel getSlotById(long id);
     public void updateSlot(SlotModel slot);
     public List<SlotModel> getSlotsByUsername(String username);
-    public List<SlotModel> getSlotsNotAvailable();
+    public List<SlotModel> getSlots();
     public void deleteSlot(SlotModel slotModel);
 }

@@ -8,14 +8,12 @@ import example.ru.freeslotbottg.database.service.slots.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class SlotByIdServiceImplClient implements SetSlot, GetAllSlotsByStaff, GetSlotById, UpdateSlot,
-        GetSlotsByUsernameClient, GetAllSlotsNotAvailable, DeleteSlotById {
+        GetSlotsByUsernameClient, GetAllSlots, DeleteSlotById {
     private SlotRepo slotRepo;
 
     @Override
@@ -44,8 +42,8 @@ public class SlotByIdServiceImplClient implements SetSlot, GetAllSlotsByStaff, G
     }
 
     @Override
-    public List<SlotModel> getSlotsNotAvailable() {
-        return slotRepo.getSlotsNotAvailable();
+    public List<SlotModel> getSlots() {
+        return slotRepo.getSlots();
     }
 
     @Override

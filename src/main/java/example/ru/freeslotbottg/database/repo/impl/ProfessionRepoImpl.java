@@ -35,4 +35,9 @@ public class ProfessionRepoImpl implements ProfessionRepo {
     public void setProfession(ProfessionModel professions) {
         entityManager.persist(professions);
     }
+
+    @Override
+    public void deleteProfession(long id) {
+        entityManager.remove(entityManager.find(ProfessionModel.class, id));
+    }
 }

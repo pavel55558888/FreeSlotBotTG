@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,9 +49,17 @@ public class MessageHandlerUserService {
 
         List<BotApiMethod<?>> actions = new ArrayList<>();
         for (SlotModel slot : slots) {
+            String text = MessageHandlerEnum.SLOT_DETAILS.format(Map.of(
+                    "profession", slot.getStaffModel().getProfession().getProfession_type(),
+                    "date", slot.getDate().toString(),
+                    "time", slot.getTime().toString(),
+                    "masterFullName", slot.getStaffModel().getFirstName() + " " + slot.getStaffModel().getLastName()
+            ));
+
             SendMessage message = SendMessage.builder()
                     .chatId(chatId)
-                    .text(slot.toString())
+                    .text(text)
+                    .parseMode("HTML")
                     .build();
             actions.add(message);
         }

@@ -8,11 +8,11 @@ import java.util.List;
 
 @Repository
 public interface SlotRepo {
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff);
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size);
     public void setSlots(SlotModel slots);
     public SlotModel getSlotById(long id);
     public void updateSlot(SlotModel slot);
-    public List<SlotModel> getSlotsByUsername(String username);
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size);
     public List<SlotModel> getSlots();
     public void deleteSlot(SlotModel slotModel);
 }

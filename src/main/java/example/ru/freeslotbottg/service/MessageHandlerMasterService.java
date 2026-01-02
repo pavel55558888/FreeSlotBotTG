@@ -1,12 +1,16 @@
 package example.ru.freeslotbottg.service;
 
+import example.ru.freeslotbottg.cache.UserStateCache;
+import example.ru.freeslotbottg.cache.model.UserStateModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.SetSlot;
 import example.ru.freeslotbottg.database.service.staff.*;
 import example.ru.freeslotbottg.enums.MasterEnum;
-import example.ru.freeslotbottg.enums.MessageHandlerEnum;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.Pagination;
+import example.ru.freeslotbottg.util.BuilderMessage;
 import example.ru.freeslotbottg.util.KeyboardFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,26 +34,34 @@ public class MessageHandlerMasterService {
     private final GetStaffByUsername getStaffByUsername;
     private final UpdateStaff updateStaff;
     private final GetAllSlotsByStaff getAllSlotsByStaff;
-    private final BuilderMessageService builderMessageService;
+    private final BuilderMessage builderMessage;
+    private final UserStateCache userStateCache;
 
     public List<BotApiMethod<?>> caseCheckAllSlots(long chatId, String username) {
         log.info("Command /slot/all");
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
         if (staffModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
 
-        List<SlotModel> slotModel = getAllSlotsByStaff.getAllSlotsByStaff(staffModel.get());
+        List<SlotModel> slotModel = getAllSlotsByStaff.getAllSlotsByStaff(
+                staffModel.get(),
+                null,
+                true,
+                Pagination.START_INDEX_PAGE.getTemplate(),
+                Pagination.PAGE_SIZE.getTemplate()
+        );
 
         if (slotModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.NULL_SLOTS.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.NULL_SLOTS.getTemplate(), chatId);
         }
 
+        userStateCache.setCache(chatId, new UserStateModel(username, System.currentTimeMillis()));
         SendMessage choice = SendMessage.builder()
                 .chatId(chatId)
-                .text(MessageHandlerEnum.YOUR_SLOT.getTemplate())
-                .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "check_slot", true, true))
+                .text(MessageAndCallbackEnum.YOUR_SLOT.getTemplate())
+                .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "check_slot", Pagination.START_INDEX_PAGE.getTemplate(), true, true))
                 .build();
         return Collections.singletonList(choice);
     }
@@ -59,19 +71,26 @@ public class MessageHandlerMasterService {
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
         if (staffModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
 
-        List<SlotModel> slotModel = getAllSlotsByStaff.getAllSlotsByStaff(staffModel.get());
+        List<SlotModel> slotModel = getAllSlotsByStaff.getAllSlotsByStaff(
+                staffModel.get(),
+                null,
+                true,
+                Pagination.START_INDEX_PAGE.getTemplate(),
+                Pagination.PAGE_SIZE.getTemplate()
+        );
 
         if (slotModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.NULL_SLOTS.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.NULL_SLOTS.getTemplate(), chatId);
         }
 
+        userStateCache.setCache(chatId, new UserStateModel(username, System.currentTimeMillis()));
         SendMessage choice = SendMessage.builder()
                 .chatId(chatId)
-                .text(MessageHandlerEnum.CHOICE_CANCEL.getTemplate())
-                .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "delete", true, false))
+                .text(MessageAndCallbackEnum.CHOICE_CANCEL.getTemplate())
+                .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "delete", Pagination.START_INDEX_PAGE.getTemplate(), true, true))
                 .build();
         return Collections.singletonList(choice);
     }
@@ -83,26 +102,26 @@ public class MessageHandlerMasterService {
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
         if (staffModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
 
         if (url.length != 4) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
         }
 
         try {
             LocalDate date = LocalDate.parse(url[2]);
             LocalTime time = LocalTime.parse(url[3]);
             if (date.isBefore(LocalDate.now())) {
-                return builderMessageService.buildMessage(MessageHandlerEnum.DATE_NOT_PAST.getTemplate(), chatId);
+                return builderMessage.buildMessage(MessageAndCallbackEnum.DATE_NOT_PAST.getTemplate(), chatId);
             }
 
             setSlot.setSlots(new SlotModel(staffModel.get(), date, time));
 
         } catch (Exception e) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
         }
-        return builderMessageService.buildMessage(MessageHandlerEnum.ADD_NEW_SLOT.getTemplate(), chatId);
+        return builderMessage.buildMessage(MessageAndCallbackEnum.ADD_NEW_SLOT.getTemplate(), chatId);
     }
 
     public List<BotApiMethod<?>> caseMasterInfo(long chatId, String username){
@@ -112,7 +131,7 @@ public class MessageHandlerMasterService {
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 
         if (staffModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         } else if (staffModel.get().getChatId() == 0) {
             staffModel.get().setChatId(chatId);
             updateStaff.updateStaff(staffModel.get());

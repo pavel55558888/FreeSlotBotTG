@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface StaffRepo {
-    public List<StaffModel> getStaffByProfessionId(long id);
+    public List<StaffModel> getStaffByProfessionId(long id, boolean pagination, int page, int size);
     public void setStaff(StaffModel staff);
     public StaffModel getStaffByFirstNameAndLastName(String firstNameAndLastName);
     public Optional<StaffModel> getStaffByUsername(String username);

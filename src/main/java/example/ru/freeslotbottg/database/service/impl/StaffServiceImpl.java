@@ -16,8 +16,8 @@ public class StaffServiceImpl implements SetStaff, GetStaffByProfessionId, GetSt
     private StaffRepo staffRepo;
 
     @Override
-    public List<StaffModel> getStaffByProfessionId(long id) {
-        return staffRepo.getStaffByProfessionId(id);
+    public List<StaffModel> getStaffByProfessionId(long id, boolean pagination, int page, int size) {
+        return staffRepo.getStaffByProfessionId(id, pagination, page, size);
     }
 
     @Override

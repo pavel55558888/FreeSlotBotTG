@@ -14,7 +14,14 @@ public class ProfessionRepoImpl implements ProfessionRepo {
     private final EntityManager entityManager;
 
     @Override
-    public List<ProfessionModel> getAllProfessions() {
+    public List<ProfessionModel> getAllProfessions(boolean pagination, int page, int size) {
+        if (pagination) {
+            return entityManager
+                    .createQuery("from ProfessionModel", ProfessionModel.class)
+                    .setFirstResult(page*size)
+                    .setMaxResults(size)
+                    .getResultList();
+        }
         return entityManager.createQuery("from ProfessionModel", ProfessionModel.class).getResultList();
     }
 

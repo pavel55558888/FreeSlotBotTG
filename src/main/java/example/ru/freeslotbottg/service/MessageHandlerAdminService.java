@@ -7,7 +7,8 @@ import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.profesion.SetProfession;
 import example.ru.freeslotbottg.database.service.staff.*;
 import example.ru.freeslotbottg.enums.AdminEnum;
-import example.ru.freeslotbottg.enums.MessageHandlerEnum;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.util.BuilderMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ public class MessageHandlerAdminService {
     private final DeleteStaff deleteStaff;
     private final DeleteProfession deleteProfession;
     private final GetStaffByProfessionId getStaffByProfessionId;
-    private final BuilderMessageService builderMessageService;
+    private final BuilderMessage builderMessage;
 
     @Value("${bot.admin}")
     private String admin;
@@ -38,7 +39,7 @@ public class MessageHandlerAdminService {
         log.info("Command /admin/new/master/**");
 
         if (!username.equals(admin)) {
-            builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
 
         try {
@@ -58,12 +59,12 @@ public class MessageHandlerAdminService {
                             url[5]
                     ));
 
-            return builderMessageService.buildMessage(
-                    (professionModel.isEmpty() ? MessageHandlerEnum.NEW_PROFESSION.getTemplate() : "")
-                            + MessageHandlerEnum.NEW_MASTER.getTemplate(), chatId);
+            return builderMessage.buildMessage(
+                    (professionModel.isEmpty() ? MessageAndCallbackEnum.NEW_PROFESSION.getTemplate() : "")
+                            + MessageAndCallbackEnum.NEW_MASTER.getTemplate(), chatId);
         }catch (Exception e) {
             log.error("Ошибка при добавление нового мастер:\n" + e.getMessage());
-            return builderMessageService.buildMessage(MessageHandlerEnum.NOT_FOUND_ADMIN_NEW_MASTER.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.NOT_FOUND_ADMIN_NEW_MASTER.getTemplate(), chatId);
         }
     }
 
@@ -71,24 +72,25 @@ public class MessageHandlerAdminService {
         log.info("Command /admin/delete/master/*");
 
         if (!username.equals(admin)) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
         String usernameStaff = text.split("/")[4].replace("@", "");
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(usernameStaff);
 
         if(staffModel.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.MASTER_NULL.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.MASTER_NULL.getTemplate(), chatId);
         }
 
         deleteStaff.deleteStaff(staffModel.get().getId());
 
-        List<StaffModel> staffListByProfession = getStaffByProfessionId.getStaffByProfessionId(staffModel.get().getProfession().getId());
+        List<StaffModel> staffListByProfession
+                = getStaffByProfessionId.getStaffByProfessionId(staffModel.get().getProfession().getId(), false, 0,0);
 
         if (staffListByProfession.isEmpty()) {
             deleteProfession.deleteProfession(staffModel.get().getProfession().getId());
         }
-        return builderMessageService.buildMessage((staffListByProfession.isEmpty()
-                ? MessageHandlerEnum.DELETE_PROFESSION.getTemplate() : "") + MessageHandlerEnum.DELETE_MASTER.getTemplate(), chatId);
+        return builderMessage.buildMessage((staffListByProfession.isEmpty()
+                ? MessageAndCallbackEnum.DELETE_PROFESSION.getTemplate() : "") + MessageAndCallbackEnum.DELETE_MASTER.getTemplate(), chatId);
 
     }
 
@@ -96,7 +98,7 @@ public class MessageHandlerAdminService {
         log.info("Command /admin");
 
         if (!username.equals(admin)) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         }
 
         return List.of(SendMessage.builder()

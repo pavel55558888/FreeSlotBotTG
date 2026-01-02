@@ -16,10 +16,17 @@ public class StaffRepoImpl implements StaffRepo {
     private final EntityManager entityManager;
 
     @Override
-    public List<StaffModel> getStaffByProfessionId(long id) {
+    public List<StaffModel> getStaffByProfessionId(long id, boolean pagination, int page, int size) {
         String jpql = "SELECT s FROM StaffModel s WHERE s.profession.id = :professionId";
-        TypedQuery<StaffModel> query = entityManager.createQuery(jpql, StaffModel.class);
-        query.setParameter("professionId", id);
+        TypedQuery<StaffModel> query = entityManager.createQuery(jpql, StaffModel.class)
+                .setParameter("professionId", id);
+
+        if (pagination) {
+            int offset = page * size;
+            query.setFirstResult(offset);
+            query.setMaxResults(size);
+        }
+
         return query.getResultList();
     }
 

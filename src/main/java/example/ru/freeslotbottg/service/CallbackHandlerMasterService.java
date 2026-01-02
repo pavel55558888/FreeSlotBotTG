@@ -3,7 +3,8 @@ package example.ru.freeslotbottg.service;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
-import example.ru.freeslotbottg.enums.CallbackHandlerEnum;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.service.pagination.CallbackHandlerMasterPaginationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -19,8 +20,14 @@ import java.util.Optional;
 public class CallbackHandlerMasterService {
     private final GetSlotById getSlotById;
     private final DeleteSlotById deleteSlotById;
+    private final CallbackHandlerMasterPaginationService callbackHandlerMasterPaginationService;
 
-    public List<BotApiMethod<?>> caseDelete(List<BotApiMethod<?>> actions, long chatId, int messageId, String value) {
+    public List<BotApiMethod<?>> caseDelete(List<BotApiMethod<?>> actions, long chatId,
+                                            int messageId, String value, int page, String prefix) {
+
+        if (!(page < 0)){
+            return callbackHandlerMasterPaginationService.caseDeletePagination(actions, chatId, messageId, value, page, prefix);
+        }
 
         Optional<SlotModel> slotOpt = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
@@ -28,7 +35,7 @@ public class CallbackHandlerMasterService {
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
-                    .text(CallbackHandlerEnum.ERROR_FORBIDDEN.getTemplate())
+                    .text(MessageAndCallbackEnum.ERROR_FORBIDDEN.getTemplate())
                     .build());
             return actions;
         }
@@ -36,7 +43,7 @@ public class CallbackHandlerMasterService {
         SlotModel slot = slotOpt.get();
 
         if (!slot.isAvailable()) {
-            String messageText = CallbackHandlerEnum.SLOT_DELETED_NOTIFY.format(Map.of(
+            String messageText = MessageAndCallbackEnum.SLOT_DELETED_NOTIFY.format(Map.of(
                     "master", slot.getStaffModel().toString(),
                     "date", slot.getDate().toString(),
                     "time", slot.getTime().toString()
@@ -54,20 +61,25 @@ public class CallbackHandlerMasterService {
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
-                .text(CallbackHandlerEnum.SLOT_DELETED_SUCCESS.getTemplate())
+                .text(MessageAndCallbackEnum.SLOT_DELETED_SUCCESS.getTemplate())
                 .build());
 
         return actions;
     }
 
-    public List<BotApiMethod<?>> caseCheckSlot(List<BotApiMethod<?>> actions, long chatId, String value, String firstName, String lastName) {
+    public List<BotApiMethod<?>> caseCheckSlot(List<BotApiMethod<?>> actions, long chatId, int messageId, String value,
+                                               String firstName, String lastName, int page, String prefix) {
+
+        if (!(page < 0)){
+            return callbackHandlerMasterPaginationService.caseCheckSlotsPagination(actions, chatId, messageId, value, page, prefix);
+        }
 
         Optional<SlotModel> slotOpt = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
         if (slotOpt.isEmpty()) {
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.SLOT_NOT_FOUND.getTemplate())
+                    .text(MessageAndCallbackEnum.SLOT_NOT_FOUND.getTemplate())
                     .parseMode("HTML")
                     .build());
             return actions;
@@ -78,7 +90,7 @@ public class CallbackHandlerMasterService {
         if (!slot.isAvailable()) {
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.SLOT_INFO_TAKEN.format(Map.of(
+                    .text(MessageAndCallbackEnum.SLOT_INFO_TAKEN.format(Map.of(
                             "date", slot.getDate().toString(),
                             "time", slot.getTime().toString(),
                             "clientName", firstName + " " + lastName,
@@ -93,7 +105,7 @@ public class CallbackHandlerMasterService {
             );
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.SLOT_INFO_AVAILABLE.format(freeSlotReplacements))
+                    .text(MessageAndCallbackEnum.SLOT_INFO_AVAILABLE.format(freeSlotReplacements))
                     .parseMode("HTML")
                     .build());
         }

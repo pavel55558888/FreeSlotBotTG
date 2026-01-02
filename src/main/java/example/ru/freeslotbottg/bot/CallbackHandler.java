@@ -2,7 +2,8 @@ package example.ru.freeslotbottg.bot;
 
 import example.ru.freeslotbottg.service.CallbackHandlerMasterService;
 import example.ru.freeslotbottg.service.CallbackHandlerUserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -13,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class CallbackHandler {
     private final CallbackHandlerMasterService callbackHandlerMasterService;
     private final CallbackHandlerUserService callbackHandlerUserService;
@@ -25,6 +27,8 @@ public class CallbackHandler {
         String username = query.getFrom().getUserName();
         String firstName = query.getFrom().getFirstName();
         String lastName = query.getFrom().getLastName();
+        log.info("Data: {},chatId: {}, messageId: {}, username: {}, firstName: {}, lastName: {}",
+                data, chatId, messageId, username, firstName, lastName);
 
         List<BotApiMethod<?>> actions = new ArrayList<>();
         actions.add(AnswerCallbackQuery.builder()
@@ -35,21 +39,23 @@ public class CallbackHandler {
             return actions;
         }
 
-        String[] parts = data.split(":", 2);
-        if (parts.length != 2) {
+        String[] parts = data.split(":");
+        if (parts.length != 2 && parts.length != 3) {
             return actions;
         }
 
         String action = parts[0];
         String value = parts[1];
+        int page = parts.length > 2 ? Integer.parseInt(parts[2]) : -1;
+        log.info("Selected -> action: {}, value: {}, page: {}", action, value, page);
 
         return switch (action){
-            case ("activity") -> callbackHandlerUserService.caseActivity(actions, chatId, messageId, value);
-            case ("master") -> callbackHandlerUserService.caseMaster(actions, chatId, messageId, value);
-            case ("slot") -> callbackHandlerUserService.caseSlot(actions, chatId, messageId, value, username, firstName, lastName);
-            case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName);
-            case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value);
-            case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, value, firstName, lastName);
+            case ("activity") -> callbackHandlerUserService.caseActivity(actions, chatId, messageId, value, page, action);
+            case ("master") -> callbackHandlerUserService.caseMaster(actions, chatId, messageId, value, page, action);
+            case ("slot") -> callbackHandlerUserService.caseSlot(actions, chatId, messageId, value, username, firstName, lastName, page, action);
+            case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName, page, action, username);
+            case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value, page, action);
+            case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, messageId, value, firstName, lastName, page, action);
             default -> {
                 actions.add(SendMessage.builder()
                         .chatId(chatId)

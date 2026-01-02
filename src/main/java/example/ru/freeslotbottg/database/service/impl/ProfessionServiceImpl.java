@@ -17,11 +17,6 @@ public class ProfessionServiceImpl implements GetAllProfession, GetByProfession,
     private ProfessionRepo professionRepo;
 
     @Override
-    public List<ProfessionModel> getAllProfessions() {
-        return professionRepo.getAllProfessions();
-    }
-
-    @Override
     public ProfessionModel getByProfession(String profession) {
         return professionRepo.getByProfession(profession);
     }
@@ -34,5 +29,11 @@ public class ProfessionServiceImpl implements GetAllProfession, GetByProfession,
     @Override
     public void deleteProfession(long id) {
         professionRepo.deleteProfession(id);
+    }
+
+    @Override
+    public List<ProfessionModel> getAllProfessions(boolean pagination, int page, int size) {
+
+        return professionRepo.getAllProfessions(pagination, page, size);
     }
 }

@@ -4,6 +4,7 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.repo.SlotRepo;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,16 +18,33 @@ public class SlotRepoImpl implements SlotRepo {
     private final EntityManager entityManager;
 
     @Override
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff) {
-        String jpql = """
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size) {
+
+        StringBuilder jpql = new StringBuilder("""
         SELECT s FROM SlotModel s
         WHERE s.staffModel = :staff
-        ORDER BY s.date, s.time
-        """;
+        """);
 
-        return entityManager.createQuery(jpql, SlotModel.class)
-                .setParameter("staff", staff)
-                .getResultList();
+        if (isAvailable != null) {
+            jpql.append(" AND s.isAvailable = :isAvailable");
+        }
+
+        jpql.append(" ORDER BY s.date, s.time");
+
+        TypedQuery<SlotModel> query = entityManager.createQuery(jpql.toString(), SlotModel.class)
+                .setParameter("staff", staff);
+
+        if (isAvailable != null) {
+            query.setParameter("isAvailable", isAvailable);
+        }
+
+        if (pagination) {
+            int offset = page * size;
+            query.setFirstResult(offset);
+            query.setMaxResults(size);
+        }
+
+        return query.getResultList();
     }
 
     @Override
@@ -45,10 +63,19 @@ public class SlotRepoImpl implements SlotRepo {
     }
 
     @Override
-    public List<SlotModel> getSlotsByUsername(String username) {
-        return entityManager.createQuery("from SlotModel where usernameClient = :username", SlotModel.class)
-                .setParameter("username", username)
-                .getResultList();
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size) {
+        TypedQuery<SlotModel> query = entityManager.createQuery(
+                "SELECT s FROM SlotModel s WHERE s.usernameClient = :username",
+                SlotModel.class
+        ).setParameter("username", username);
+
+        if (pagination) {
+            int offset = page * size;
+            query.setFirstResult(offset);
+            query.setMaxResults(size);
+        }
+
+        return query.getResultList();
     }
 
     @Override

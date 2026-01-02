@@ -1,5 +1,7 @@
 package example.ru.freeslotbottg.service;
 
+import example.ru.freeslotbottg.cache.UserStateCache;
+import example.ru.freeslotbottg.cache.model.UserStateModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
@@ -8,9 +10,12 @@ import example.ru.freeslotbottg.database.service.slots.GetSlotById;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
 import example.ru.freeslotbottg.database.service.staff.GetStaffByFirstNameAndLastName;
 import example.ru.freeslotbottg.database.service.staff.GetStaffByProfessionId;
-import example.ru.freeslotbottg.enums.CallbackHandlerEnum;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.Pagination;
+import example.ru.freeslotbottg.service.pagination.CallbackHandlerUserPaginationService;
 import example.ru.freeslotbottg.util.KeyboardFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,6 +28,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CallbackHandlerUserService {
     private final KeyboardFactory keyboardFactory;
     private final GetByProfession getByProfession;
@@ -31,18 +37,28 @@ public class CallbackHandlerUserService {
     private final GetAllSlotsByStaff getAllSlotsByStaff;
     private final GetSlotById getSlotById;
     private final UpdateSlot updateSlot;
+    private final UserStateCache userStateCache;
+    private final CallbackHandlerUserPaginationService callbackHandlerUserPaginationService;
 
-    public List<BotApiMethod<?>> caseActivity(List<BotApiMethod<?>> actions, long chatId, int messageId, String value) {
+    public List<BotApiMethod<?>> caseActivity(List<BotApiMethod<?>> actions, long chatId,
+                                              int messageId, String value, int page, String prefix) {
+        if (!(page < 0)){
+            return callbackHandlerUserPaginationService.caseActivityPagination(actions, chatId, messageId, value, page, prefix);
+        }
+
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
-                .text(CallbackHandlerEnum.YOU_SELECTED.format(Map.of("value", value)))
+                .text(MessageAndCallbackEnum.YOU_SELECTED.format(Map.of("value", value)))
                 .parseMode("HTML")
                 .build());
 
         List<String> masters = getStaffByProfessionId
                 .getStaffByProfessionId(
-                        getByProfession.getByProfession(value).getId()
+                        getByProfession.getByProfession(value).getId(),
+                        true,
+                        Pagination.START_INDEX_PAGE.getTemplate(),
+                        Pagination.PAGE_SIZE.getTemplate()
                 )
                 .stream()
                 .map(StaffModel::toString)
@@ -51,77 +67,93 @@ public class CallbackHandlerUserService {
         if (masters.isEmpty()) {
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.NO_MASTERS_IN_CATEGORY.getTemplate())
+                    .text(MessageAndCallbackEnum.NO_MASTERS_IN_CATEGORY.getTemplate())
                     .build());
         } else {
-            InlineKeyboardMarkup keyboard = keyboardFactory.createKeyboard(masters, "master");
+            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+            InlineKeyboardMarkup keyboard = keyboardFactory.createKeyboard(masters, "master", Pagination.START_INDEX_PAGE.getTemplate());
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.CHOOSE_MASTER.getTemplate())
+                    .text(MessageAndCallbackEnum.CHOOSE_MASTER.getTemplate())
                     .replyMarkup(keyboard)
                     .build());
         }
         return actions;
     }
 
-    public List<BotApiMethod<?>> caseMaster(List<BotApiMethod<?>> actions, long chatId, int messageId, String value) {
+    public List<BotApiMethod<?>> caseMaster(List<BotApiMethod<?>> actions, long chatId, int messageId,
+                                            String value, int page, String prefix) {
+        if (!(page < 0)){
+            return callbackHandlerUserPaginationService.caseMasterPagination(actions, chatId, messageId, value, page, prefix);
+        }
+
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
-                .text(CallbackHandlerEnum.YOU_SELECTED.format(Map.of("value", value)))
+                .text(MessageAndCallbackEnum.YOU_SELECTED.format(Map.of("value", value)))
                 .parseMode("HTML")
                 .build());
 
         List<SlotModel> slots = getAllSlotsByStaff
-                .getAllSlotsByStaff(getStaffByFirstNameAndLastName.getStaffByFirstNameAndLastName(value))
-                .stream()
-                .filter(SlotModel::isAvailable)
-                .toList();
+                .getAllSlotsByStaff(
+                        getStaffByFirstNameAndLastName.getStaffByFirstNameAndLastName(value),
+                        true,
+                        true,
+                        Pagination.START_INDEX_PAGE.getTemplate(),
+                        Pagination.PAGE_SIZE.getTemplate()
+                );
 
         if (slots.isEmpty()) {
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.NO_SLOTS_FOR_MASTER.getTemplate())
+                    .text(MessageAndCallbackEnum.NO_SLOTS_FOR_MASTER.getTemplate())
                     .build());
         } else {
-            InlineKeyboardMarkup keyboard = keyboardFactory.buildSlotKeyboard(slots, "slot", true, false);
+            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+            InlineKeyboardMarkup keyboard
+                    = keyboardFactory.buildSlotKeyboard(slots, "slot", Pagination.START_INDEX_PAGE.getTemplate(),  true, false);
             actions.add(SendMessage.builder()
                     .chatId(chatId)
-                    .text(CallbackHandlerEnum.CHOOSE_SLOT.getTemplate())
+                    .text(MessageAndCallbackEnum.CHOOSE_SLOT.getTemplate())
                     .replyMarkup(keyboard)
                     .build());
         }
         return actions;
     }
 
-    public List<BotApiMethod<?>> caseSlot(List<BotApiMethod<?>> actions, long chatId, int messageId,
-                                          String value, String username, String firstName, String lastName) {
-        SlotModel slot = getSlotById.getSlotById(Long.parseLong(value));
+    public List<BotApiMethod<?>> caseSlot(List<BotApiMethod<?>> actions, long chatId, int messageId, String value,
+                                          String username, String firstName, String lastName, int page, String prefix) {
+        if (!(page < 0)){
+            return callbackHandlerUserPaginationService.caseSlotPagination(actions, chatId, messageId, value, page, prefix);
+        }
 
-        if (slot != null && slot.isAvailable()) {
-            slot.setAvailable(false);
-            slot.setUsernameClient(username);
-            slot.setChatId(chatId);
-            updateSlot.updateSlot(slot);
+        Optional<SlotModel> slot = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
+        if (slot.isPresent() && slot.get().isAvailable()) {
+            slot.get().setAvailable(false);
+            slot.get().setUsernameClient(username);
+            slot.get().setChatId(chatId);
+            updateSlot.updateSlot(slot.get());
+
+            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
-                    .text(CallbackHandlerEnum.SUCCESS_BOOKING.format(Map.of(
-                            "master", slot.getStaffModel().toString(),
-                            "date", slot.getDate().toString(),
-                            "time", slot.getTime().toString()
+                    .text(MessageAndCallbackEnum.SUCCESS_BOOKING.format(Map.of(
+                            "master", slot.get().getStaffModel().toString(),
+                            "date", slot.get().getDate().toString(),
+                            "time", slot.get().getTime().toString()
                     )))
                     .parseMode("HTML")
                     .build());
 
             actions.add(SendMessage.builder()
-                    .chatId(slot.getStaffModel().getChatId())
-                    .text(CallbackHandlerEnum.NOTIFICATION_TO_MASTER_NEW_BOOKING.format(Map.of(
+                    .chatId(slot.get().getStaffModel().getChatId())
+                    .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_NEW_BOOKING.format(Map.of(
                             "clientName", firstName + " " + lastName,
                             "username", username != null ? username : "—",
-                            "date", slot.getDate().toString(),
-                            "time", slot.getTime().toString()
+                            "date", slot.get().getDate().toString(),
+                            "time", slot.get().getTime().toString()
                     )))
                     .parseMode("HTML")
                     .build());
@@ -129,20 +161,25 @@ public class CallbackHandlerUserService {
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
-                    .text(CallbackHandlerEnum.SLOT_ALREADY_TAKEN.getTemplate())
+                    .text(MessageAndCallbackEnum.SLOT_ALREADY_TAKEN.getTemplate())
                     .build());
         }
         return actions;
     }
 
-    public List<BotApiMethod<?>> caseCanceled(List<BotApiMethod<?>> actions, long chatId, int messageId, String value, String firstName, String lastName) {
+    public List<BotApiMethod<?>> caseCanceled(List<BotApiMethod<?>> actions, long chatId, int messageId, String value,
+                                              String firstName, String lastName, int page, String prefix, String username) {
+        if (!(page < 0)){
+            return callbackHandlerUserPaginationService.caseCanceledPagination(actions, chatId, messageId, value, page, prefix, username);
+        }
+
         Optional<SlotModel> slotOpt = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
         if (slotOpt.isEmpty()) {
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
-                    .text(CallbackHandlerEnum.ERROR_FORBIDDEN.getTemplate())
+                    .text(MessageAndCallbackEnum.ERROR_FORBIDDEN.getTemplate())
                     .build());
             return actions;
         }
@@ -158,7 +195,7 @@ public class CallbackHandlerUserService {
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
-                .text(CallbackHandlerEnum.CANCELLATION_SUCCESS.format(Map.of(
+                .text(MessageAndCallbackEnum.CANCELLATION_SUCCESS.format(Map.of(
                         "master", slot.getStaffModel().toString(),
                         "date", slot.getDate().toString(),
                         "time", slot.getTime().toString()
@@ -168,7 +205,7 @@ public class CallbackHandlerUserService {
 
         actions.add(SendMessage.builder()
                 .chatId(slot.getStaffModel().getChatId())
-                .text(CallbackHandlerEnum.NOTIFICATION_TO_MASTER_CANCELLATION.format(Map.of(
+                .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_CANCELLATION.format(Map.of(
                         "date", slot.getDate().toString(),
                         "time", slot.getTime().toString(),
                         "clientName", firstName + " " + lastName,

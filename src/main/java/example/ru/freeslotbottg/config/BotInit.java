@@ -18,6 +18,6 @@ public class BotInit {
     public void botInit() {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(telegramBot);
-        System.out.println("<> Telegram Bot Initialized");
+        System.out.println("<> Telegram bot started");
     }
 }

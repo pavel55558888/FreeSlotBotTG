@@ -7,5 +7,5 @@ import java.util.List;
 
 @Service
 public interface GetAllProfession {
-    public List<ProfessionModel> getAllProfessions();
+    public List<ProfessionModel> getAllProfessions(boolean pagination, int page, int size);
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Repository
 public interface ProfessionRepo {
-    public List<ProfessionModel> getAllProfessions();
+    public List<ProfessionModel> getAllProfessions(boolean pagination, int page, int size);
     public ProfessionModel getByProfession(String profession);
     public void setProfession(ProfessionModel professions);
     public void deleteProfession(long id);

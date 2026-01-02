@@ -7,5 +7,5 @@ import java.util.List;
 
 @Service
 public interface GetStaffByProfessionId {
-    public List<StaffModel> getStaffByProfessionId(long id);
+    public List<StaffModel> getStaffByProfessionId(long id, boolean pagination, int page, int size);
 }

@@ -1,10 +1,14 @@
 package example.ru.freeslotbottg.service;
 
+import example.ru.freeslotbottg.cache.UserStateCache;
+import example.ru.freeslotbottg.cache.model.UserStateModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
-import example.ru.freeslotbottg.database.repo.ProfessionRepo;
+import example.ru.freeslotbottg.database.service.profesion.GetAllProfession;
 import example.ru.freeslotbottg.database.service.slots.GetSlotsByUsernameClient;
-import example.ru.freeslotbottg.enums.MessageHandlerEnum;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.Pagination;
 import example.ru.freeslotbottg.enums.StartEnums;
+import example.ru.freeslotbottg.util.BuilderMessage;
 import example.ru.freeslotbottg.util.KeyboardFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +23,10 @@ import java.util.*;
 @Slf4j
 public class MessageHandlerUserService {
     private final KeyboardFactory keyboardFactory;
-    private final ProfessionRepo professionRepo;
+    private final GetAllProfession getAllProfession;
     private final GetSlotsByUsernameClient getSlotsByUsernameClient;
-    private final BuilderMessageService builderMessageService;
+    private final BuilderMessage builderMessage;
+    private final UserStateCache userStateCache;
 
     public List<BotApiMethod<?>> caseStart(long chatId, String firstName){
         log.info("Command /start");
@@ -32,8 +37,13 @@ public class MessageHandlerUserService {
 
         SendMessage choice = SendMessage.builder()
                 .chatId(chatId)
-                .text(MessageHandlerEnum.CHOICE_PROFESSION.getTemplate())
-                .replyMarkup(keyboardFactory.createKeyboard(professionRepo.getAllProfessions(), "activity"))
+                .text(MessageAndCallbackEnum.CHOICE_PROFESSION.getTemplate())
+                .replyMarkup(keyboardFactory.createKeyboard(
+                        getAllProfession.getAllProfessions(
+                                true,
+                                Pagination.START_INDEX_PAGE.getTemplate(),
+                                Pagination.PAGE_SIZE.getTemplate()
+                        ), "activity", Pagination.START_INDEX_PAGE.getTemplate()))
                 .build();
 
         return Arrays.asList(welcome, choice);
@@ -41,15 +51,20 @@ public class MessageHandlerUserService {
 
     public List<BotApiMethod<?>> caseMySlots(long chatId, String username){
         log.info("Command /my_slots");
-        List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(username);
+        List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(
+                username,
+                false,
+                0,
+                0
+        );
 
         if (slots.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.NULL_SLOTS.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.NULL_SLOTS.getTemplate(), chatId);
         }
 
         List<BotApiMethod<?>> actions = new ArrayList<>();
         for (SlotModel slot : slots) {
-            String text = MessageHandlerEnum.SLOT_DETAILS.format(Map.of(
+            String text = MessageAndCallbackEnum.SLOT_DETAILS.format(Map.of(
                     "profession", slot.getStaffModel().getProfession().getProfession_type(),
                     "date", slot.getDate().toString(),
                     "time", slot.getTime().toString(),
@@ -68,16 +83,22 @@ public class MessageHandlerUserService {
 
     public List<BotApiMethod<?>> caseCanceledSlot(long chatId, String username){
         log.info("Command /cancel_slot");
-        List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(username);
+        List<SlotModel> slots = getSlotsByUsernameClient.getSlotsByUsername(
+                username,
+                true,
+                Pagination.START_INDEX_PAGE.getTemplate(),
+                Pagination.PAGE_SIZE.getTemplate()
+        );
 
         if (slots.isEmpty()) {
-            return builderMessageService.buildMessage(MessageHandlerEnum.NULL_SLOTS.getTemplate(), chatId);
+            return builderMessage.buildMessage(MessageAndCallbackEnum.NULL_SLOTS.getTemplate(), chatId);
         }
 
+        userStateCache.setCache(chatId, new UserStateModel(username, System.currentTimeMillis()));
         SendMessage choice = SendMessage.builder()
                 .chatId(chatId)
-                .text(MessageHandlerEnum.CHOICE_CANCEL.getTemplate())
-                .replyMarkup(keyboardFactory.buildSlotKeyboard(slots, "canceled", false, false))
+                .text(MessageAndCallbackEnum.CHOICE_CANCEL.getTemplate())
+                .replyMarkup(keyboardFactory.buildSlotKeyboard(slots, "canceled", Pagination.START_INDEX_PAGE.getTemplate(), false, false))
                 .build();
 
         return Collections.singletonList(choice);

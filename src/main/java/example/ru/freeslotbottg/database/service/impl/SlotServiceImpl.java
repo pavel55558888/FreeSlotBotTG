@@ -12,13 +12,13 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class SlotByIdServiceImplClient implements SetSlot, GetAllSlotsByStaff, GetSlotById, UpdateSlot,
+public class SlotServiceImpl implements SetSlot, GetAllSlotsByStaff, GetSlotById, UpdateSlot,
         GetSlotsByUsernameClient, GetAllSlots, DeleteSlotById {
     private SlotRepo slotRepo;
 
     @Override
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff) {
-        return slotRepo.getAllSlotsByStaff(staff);
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff,Boolean isAvailable, boolean pagination, int page, int size) {
+        return slotRepo.getAllSlotsByStaff(staff, isAvailable, pagination, page, size);
     }
 
     @Override
@@ -37,8 +37,8 @@ public class SlotByIdServiceImplClient implements SetSlot, GetAllSlotsByStaff, G
     }
 
     @Override
-    public List<SlotModel> getSlotsByUsername(String username) {
-        return slotRepo.getSlotsByUsername(username);
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size) {
+        return slotRepo.getSlotsByUsername(username, pagination, page, size);
     }
 
     @Override

@@ -1,10 +1,11 @@
 package example.ru.freeslotbottg.scheduler;
 
 import example.ru.freeslotbottg.bot.TelegramBot;
+import example.ru.freeslotbottg.cache.UserStateCache;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlots;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,15 +16,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class DailyReminderScheduler {
     private final GetAllSlots getAllSlots;
     private final TelegramBot telegramBot;
     private final DeleteSlotById deleteSlotById;
+    private final UserStateCache userStateCache;
 
     @Scheduled(cron = "0 00 11 * * ?")
-    public void sendDailyReminders() {
+    private void sendDailyReminders() {
         log.info("Запуск ежедневного уведомления");
         List<SlotModel> allSlots = getAllSlots.getSlots();
         LocalDateTime now = LocalDateTime.now();

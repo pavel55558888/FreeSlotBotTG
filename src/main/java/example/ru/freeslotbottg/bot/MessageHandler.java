@@ -1,7 +1,7 @@
 package example.ru.freeslotbottg.bot;
 
-import example.ru.freeslotbottg.enums.MessageHandlerEnum;
-import example.ru.freeslotbottg.service.BuilderMessageService;
+import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.util.BuilderMessage;
 import example.ru.freeslotbottg.service.MessageHandlerAdminService;
 import example.ru.freeslotbottg.service.MessageHandlerMasterService;
 import example.ru.freeslotbottg.service.MessageHandlerUserService;
@@ -20,7 +20,7 @@ public class MessageHandler {
     private final MessageHandlerUserService userService;
     private final MessageHandlerAdminService adminService;
     private final MessageHandlerMasterService masterService;
-    private final BuilderMessageService builderMessageService;
+    private final BuilderMessage builderMessage;
 
     public List<BotApiMethod<?>> handle(Update update) {
         long chatId = update.getMessage().getChatId();
@@ -28,6 +28,7 @@ public class MessageHandler {
         String firstName = update.getMessage().getFrom().getFirstName();
         String username = update.getMessage().getFrom().getUserName();
 
+        log.info("Selected: {}", text);
         return switch (text) {
             case ("/start") -> userService.caseStart(chatId, firstName);
             case ("/my_slots") -> userService.caseMySlots(chatId, username);
@@ -39,7 +40,7 @@ public class MessageHandler {
             case ("/slot/delete") -> masterService.caseDeleteSlot(chatId, username);
             case String s when s.startsWith("/slot") -> masterService.caseSetSlot(chatId, username, text);
             case ("/master") -> masterService.caseMasterInfo(chatId, username);
-            default -> builderMessageService.buildMessage(MessageHandlerEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+            default -> builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
         };
     }
 }

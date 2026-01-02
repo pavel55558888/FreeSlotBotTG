@@ -25,7 +25,7 @@ public class CallbackHandler {
         long chatId = query.getMessage().getChatId();
         int messageId = query.getMessage().getMessageId();
         String username = query.getFrom().getUserName();
-        String firstName = query.getFrom().getFirstName();
+        String firstName = query.getFrom().getFirstName().isEmpty() ? "" : query.getFrom().getFirstName();
         String lastName = query.getFrom().getLastName();
         log.info("Data: {},chatId: {}, messageId: {}, username: {}, firstName: {}, lastName: {}",
                 data, chatId, messageId, username, firstName, lastName);
@@ -55,7 +55,7 @@ public class CallbackHandler {
             case ("slot") -> callbackHandlerUserService.caseSlot(actions, chatId, messageId, value, username, firstName, lastName, page, action);
             case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName, page, action, username);
             case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value, page, action);
-            case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, messageId, value, firstName, lastName, page, action);
+            case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, messageId, value, page, action);
             default -> {
                 actions.add(SendMessage.builder()
                         .chatId(chatId)

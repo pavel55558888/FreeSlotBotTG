@@ -28,6 +28,10 @@ public class SlotModel {
     @Column(nullable = true)
     private String usernameClient;
     @Column(nullable = true)
+    private String firstNameClient;
+    @Column(nullable = true)
+    private String lastNameClient;
+    @Column(nullable = true)
     private long chatId;
 
     public SlotModel(StaffModel staffModel, LocalDate date, LocalTime time) {

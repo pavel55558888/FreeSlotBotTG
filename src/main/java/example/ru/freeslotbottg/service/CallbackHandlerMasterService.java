@@ -67,8 +67,8 @@ public class CallbackHandlerMasterService {
         return actions;
     }
 
-    public List<BotApiMethod<?>> caseCheckSlot(List<BotApiMethod<?>> actions, long chatId, int messageId, String value,
-                                               String firstName, String lastName, int page, String prefix) {
+    public List<BotApiMethod<?>> caseCheckSlot(List<BotApiMethod<?>> actions, long chatId, int messageId,
+                                               String value, int page, String prefix) {
 
         if (!(page < 0)){
             return callbackHandlerMasterPaginationService.caseCheckSlotsPagination(actions, chatId, messageId, value, page, prefix);
@@ -93,7 +93,7 @@ public class CallbackHandlerMasterService {
                     .text(MessageAndCallbackEnum.SLOT_INFO_TAKEN.format(Map.of(
                             "date", slot.getDate().toString(),
                             "time", slot.getTime().toString(),
-                            "clientName", firstName + " " + lastName,
+                            "clientName", slot.getFirstNameClient() + " " + slot.getLastNameClient(),
                             "usernameClient", slot.getUsernameClient() != null ? slot.getUsernameClient() : "—"
                     )))
                     .parseMode("HTML")

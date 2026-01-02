@@ -133,6 +133,8 @@ public class CallbackHandlerUserService {
             slot.get().setAvailable(false);
             slot.get().setUsernameClient(username);
             slot.get().setChatId(chatId);
+            slot.get().setFirstNameClient(firstName);
+            slot.get().setLastNameClient(lastName);
             updateSlot.updateSlot(slot.get());
 
             userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));

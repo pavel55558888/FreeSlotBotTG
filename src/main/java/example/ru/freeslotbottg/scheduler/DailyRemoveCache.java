@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class DailyRemoveCache {
     private final UserStateCache userStateCache;
 
-    @Scheduled(cron = "0 00 00 * * ?")
+    @Scheduled(cron = "${scheduler.remove.cache.crone}")
     private void cleanerCache(){
         long now = System.currentTimeMillis();
         long twelveHoursInMillis = TimeUnit.HOURS.toMillis(12);

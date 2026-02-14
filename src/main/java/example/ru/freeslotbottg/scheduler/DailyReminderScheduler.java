@@ -8,6 +8,7 @@ import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
 import example.ru.freeslotbottg.enums.SchedulerNotifyEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -26,8 +27,7 @@ public class DailyReminderScheduler {
     private final DeleteSlotById deleteSlotById;
     private final UpdateSlot updateSlot;
 
-    //@Scheduled(cron = "0 00 11 * * ?")
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "${scheduler.notify.crone}")
     private void sendDailyReminders() {
         log.info("Запуск ежедневного уведомления");
         List<SlotModel> allSlots = getAllSlots.getSlots();

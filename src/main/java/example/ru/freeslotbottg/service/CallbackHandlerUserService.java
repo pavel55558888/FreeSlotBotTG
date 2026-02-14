@@ -110,8 +110,15 @@ public class CallbackHandlerUserService {
                     .build());
         } else {
             userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+
             InlineKeyboardMarkup keyboard
-                    = keyboardFactory.buildSlotKeyboard(slots, "slot", Pagination.START_INDEX_PAGE.getTemplate(),  true, false);
+                    = keyboardFactory.buildSlotKeyboard(
+                            slots,
+                    "slot",
+                    Pagination.START_INDEX_PAGE.getTemplate(),
+                    true,
+                    false);
+
             actions.add(SendMessage.builder()
                     .chatId(chatId)
                     .text(MessageAndCallbackEnum.CHOOSE_SLOT.getTemplate())

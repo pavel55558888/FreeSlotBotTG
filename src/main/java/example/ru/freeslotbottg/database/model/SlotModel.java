@@ -24,20 +24,19 @@ public class SlotModel {
     @Column(nullable = false)
     private LocalTime time;
     @Column(nullable = false)
-    private boolean isAvailable = true;
-    @Column(nullable = true)
+    private boolean isAvailable;
     private String usernameClient;
-    @Column(nullable = true)
     private String firstNameClient;
-    @Column(nullable = true)
     private String lastNameClient;
-    @Column(nullable = true)
     private long chatId;
+    private boolean pushNotify;
 
     public SlotModel(StaffModel staffModel, LocalDate date, LocalTime time) {
         this.staffModel = staffModel;
         this.date = date;
         this.time = time;
+        this.isAvailable = true;
+        this.pushNotify = false;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package example.ru.freeslotbottg.util;
 
 import example.ru.freeslotbottg.database.model.SlotModel;
+import example.ru.freeslotbottg.enums.MonthEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -50,9 +51,12 @@ public class KeyboardFactory {
                 .map(slot -> {
                     String display =
                             onlyDateAndTimeDisplay
-                                    ? slot.getDate() + " " + slot.getTime() + (status ? (slot.isAvailable() ? " Свободно" : " Занято") : "")
-                                    : slot.getStaffModel().getProfession().getProfession_type() + " "
-                                    + slot.getDate() + " " + slot.getTime() + "\n";
+                                    ? slot.getDate().getDayOfMonth() + " "
+                                    + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonth() + " " + slot.getTime()
+                                    + " " + (status ? (slot.isAvailable() ? " -> Свободно" : " -> Занято") : "")
+                                    : slot.getStaffModel().getProfession().getProfession_type() + " -> "
+                                    + slot.getDate().getDayOfMonth() + " "
+                                    + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonth() + " " + slot.getTime() + "\n";
                     String callbackData = prefix + ":" + slot.getId();
 
                     return InlineKeyboardButton.builder()

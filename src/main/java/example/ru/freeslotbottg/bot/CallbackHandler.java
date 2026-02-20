@@ -53,7 +53,7 @@ public class CallbackHandler {
 
         return switch (action){
             case ("activity") -> callbackHandlerUserService.caseActivity(actions, chatId, messageId, value, page, action);
-            case ("master") -> callbackHandlerUserService.caseMaster(actions, chatId, messageId, value, page, action);
+            case ("master") -> callbackHandlerUserService.caseMaster(actions, chatId, messageId, value, page, action, username);
             case ("slot") -> callbackHandlerUserService.caseSlot(actions, chatId, messageId, value, username, firstName, lastName, page, action);
             case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName, page, action, username);
             case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value, page, action);

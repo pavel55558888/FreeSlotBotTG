@@ -1,7 +1,11 @@
 package example.ru.freeslotbottg.scheduler;
 
 import example.ru.freeslotbottg.bot.TelegramBot;
+import example.ru.freeslotbottg.database.model.ClientModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
+import example.ru.freeslotbottg.database.service.client.GetClients;
+import example.ru.freeslotbottg.database.service.client.GetClientsCount;
+import example.ru.freeslotbottg.database.service.client.UpdateClient;
 import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlots;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
@@ -12,8 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +33,20 @@ public class DailyReminderScheduler {
     private final TelegramBot telegramBot;
     private final DeleteSlotById deleteSlotById;
     private final UpdateSlot updateSlot;
+    private final GetClientsCount getClientsCount;
+    private final GetClients getClients;
+    private final UpdateClient updateClient;
 
-    @Scheduled(cron = "${scheduler.notify.crone}")
+    @Value("${delay.user.notify.hours}")
+    private int delayUserNotifyHour;
+    @Value("${delay.master.last.activity.hours}")
+    private int delayMasterLastActivity;
+    @Value("${batch.size.select.client.db}")
+    private int batchSize;
+
+    @Scheduled(cron = "${scheduler.reminders.crone}")
     private void sendDailyReminders() {
-        log.info("Запуск ежедневного уведомления");
+        log.info("Запуск ежедневного напоминания");
         List<SlotModel> allSlots = getAllSlots.getSlots();
         LocalDateTime now = LocalDateTime.now();
         allSlots.forEach(slot -> {
@@ -78,10 +95,55 @@ public class DailyReminderScheduler {
                         slot.setPushNotify(true);
                         updateSlot.updateSlot(slot);
                     } catch (Exception ex) {
-                        log.error("Ошибка при отправке уведомления пользователю: \n" + ex.getMessage());
+                        log.error("Ошибка при отправке напоминания пользователю: \n" + ex.getMessage());
                     }
                 }
             }
         });
+    }
+
+    @Scheduled(cron = "${scheduler.notify.crone}")
+    private void sendDailyNotify() {
+        log.info("Запуск ежедневного уведомления о новых записях");
+
+        long totalClients = getClientsCount.getClientsCount();
+        int totalBatches = (int) Math.ceil((double) totalClients / batchSize);
+
+        for (int i = 0; i < totalBatches; i++) {
+            List<ClientModel> clientModelList = getClients.getClients(true, i, batchSize);
+
+            clientModelList.forEach(client -> {
+                LocalDateTime now = LocalDateTime.now();
+
+                if (client.getLastPushNotifyDate() == null ||
+                        client.getLastPushNotifyDate().atStartOfDay().isBefore(now.minusHours(delayUserNotifyHour))) {
+
+                    client.getStaffModelList().forEach(staff -> {
+
+                        if (staff.getLastActivityAddedSlotDate().atStartOfDay().isAfter(now.minusHours(delayMasterLastActivity))) {
+
+                            client.setLastPushNotifyDate(LocalDate.now());
+                            client.setLastPushNotifyTime(LocalTime.now());
+                            updateClient.updateClient(client);
+
+                            try {
+                                telegramBot.execute(SendMessage.builder()
+                                        .chatId(client.getChatId())
+                                        .text(SchedulerNotifyEnum.NOTIFY_USER_NEW_SLOT.format(
+                                                Map.of(
+                                                        "profession", staff.getProfession().getProfession_type(),
+                                                        "masterFullName", staff.getFirstName() + " "
+                                                                + staff.getLastName()
+                                                )))
+                                        .parseMode("HTML")
+                                        .build());
+                            } catch (TelegramApiException ex) {
+                                log.error("Ошибка при отправке уведомления пользователю: \n" + ex.getMessage());
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 }

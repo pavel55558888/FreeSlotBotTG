@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -119,6 +120,8 @@ public class MessageHandlerMasterService {
             }
 
             setSlot.setSlots(new SlotModel(staffModel.get(), date, time));
+            staffModel.get().setLastActivityAddedSlotDate(LocalDate.now());
+            updateStaff.updateStaff(staffModel.get());
 
         } catch (Exception e) {
             return builderMessage.buildMessage(MessageAndCallbackEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
@@ -154,6 +157,7 @@ public class MessageHandlerMasterService {
     }
 
     public List<BotApiMethod<?>> caseSetSlotV2(long chatId, String username) {
+        log.info("Command /slot/add");
 
         Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
 

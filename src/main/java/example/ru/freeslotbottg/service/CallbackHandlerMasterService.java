@@ -8,6 +8,7 @@ import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
 import example.ru.freeslotbottg.database.service.slots.SetSlot;
 import example.ru.freeslotbottg.database.service.staff.GetStaffByUsername;
+import example.ru.freeslotbottg.database.service.staff.UpdateStaff;
 import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
 import example.ru.freeslotbottg.enums.MonthEnum;
 import example.ru.freeslotbottg.service.pagination.CallbackHandlerMasterPaginationService;
@@ -40,6 +41,7 @@ public class CallbackHandlerMasterService {
     private final BuilderMessage builderMessage;
     private final GetStaffByUsername getStaffByUsername;
     private final SetSlot setSlots;
+    private final UpdateStaff updateStaff;
 
     public List<BotApiMethod<?>> caseDelete(List<BotApiMethod<?>> actions, long chatId,
                                             int messageId, String value, int page, String prefix) {
@@ -301,6 +303,8 @@ public class CallbackHandlerMasterService {
                 .parseMode("HTML")
                 .build());
 
+        staffModel.get().setLastActivityAddedSlotDate(LocalDate.now());
+        updateStaff.updateStaff(staffModel.get());
         slotCache.removeCache(username);
 
         return actions;

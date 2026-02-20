@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "staff")
 @Getter
@@ -24,6 +26,8 @@ public class StaffModel {
     private String username;
     @Column(nullable = true)
     private long chatId;
+    @Column(nullable = true)
+    private LocalDate lastActivityAddedSlotDate;
 
     public StaffModel(ProfessionModel profession, String firstName, String lastName, String username) {
         this.profession = profession;

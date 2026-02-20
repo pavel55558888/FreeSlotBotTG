@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class ClientServiceImpl implements GetClients, GetClientByUsername, SetClient, UpdateClient, GetClientsCount {
+public class ClientServiceImpl implements GetClients, GetClientByUsername, SetClient, UpdateClient, GetClientsCount, DeleteClient {
     private final ClientRepo clientRepo;
     @Override
     public Optional<ClientModel> getClientByUsername(String username) {
@@ -36,5 +36,10 @@ public class ClientServiceImpl implements GetClients, GetClientByUsername, SetCl
     @Override
     public long getClientsCount() {
         return clientRepo.getClientsCount();
+    }
+
+    @Override
+    public void deleteClient(ClientModel client) {
+        clientRepo.deleteClient(client);
     }
 }

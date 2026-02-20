@@ -61,4 +61,9 @@ public class ClientRepoImpl implements ClientRepo {
                 Long.class
         ).getSingleResult();
     }
+
+    @Override
+    public void deleteClient(ClientModel client) {
+        entityManager.remove(client);
+    }
 }

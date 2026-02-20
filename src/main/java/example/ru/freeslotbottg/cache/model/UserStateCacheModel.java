@@ -1,15 +1,13 @@
 package example.ru.freeslotbottg.cache.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserStateModel {
+@EqualsAndHashCode
+public class UserStateCacheModel {
     private String auxiliaryField;
     private long lastAction;
 }

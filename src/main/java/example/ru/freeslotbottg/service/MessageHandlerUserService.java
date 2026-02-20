@@ -1,7 +1,7 @@
 package example.ru.freeslotbottg.service;
 
 import example.ru.freeslotbottg.cache.UserStateCache;
-import example.ru.freeslotbottg.cache.model.UserStateModel;
+import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.profesion.GetAllProfession;
 import example.ru.freeslotbottg.database.service.slots.GetSlotsByUsernameClient;
@@ -94,7 +94,7 @@ public class MessageHandlerUserService {
             return builderMessage.buildMessage(MessageAndCallbackEnum.NULL_SLOTS.getTemplate(), chatId);
         }
 
-        userStateCache.setCache(chatId, new UserStateModel(username, System.currentTimeMillis()));
+        userStateCache.setCache(chatId, new UserStateCacheModel(username, System.currentTimeMillis()));
         SendMessage choice = SendMessage.builder()
                 .chatId(chatId)
                 .text(MessageAndCallbackEnum.CHOICE_CANCEL.getTemplate())

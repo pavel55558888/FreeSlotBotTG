@@ -38,6 +38,7 @@ public class MessageHandler {
             case ("/admin") -> adminService.caseAdminInfo(chatId, username);
             case ("/slot/all") -> masterService.caseCheckAllSlots(chatId, username);
             case ("/slot/delete") -> masterService.caseDeleteSlot(chatId, username);
+            case ("/slot/add") -> masterService.caseSetSlotV2(chatId, username);
             case String s when s.startsWith("/slot") -> masterService.caseSetSlot(chatId, username, text);
             case ("/master") -> masterService.caseMasterInfo(chatId, username);
             default -> builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);

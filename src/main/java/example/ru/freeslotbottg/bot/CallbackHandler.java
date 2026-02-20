@@ -46,6 +46,8 @@ public class CallbackHandler {
 
         String action = parts[0];
         String value = parts[1];
+        String valueTime = parts.length > 2 ? parts[2] : null;
+
         int page = parts.length > 2 ? Integer.parseInt(parts[2]) : -1;
         log.info("Selected -> action: {}, value: {}, page: {}", action, value, page);
 
@@ -56,6 +58,10 @@ public class CallbackHandler {
             case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName, page, action, username);
             case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value, page, action);
             case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, messageId, value, page, action);
+            case ("setSlotMonth") -> callbackHandlerMasterService.caseSetSlotGetDays(actions, chatId, messageId, value, username);
+            case ("setSlotDay") -> callbackHandlerMasterService.caseSetSlotGetHours(actions, chatId, messageId, value, username);
+            case ("setSlotHours") -> callbackHandlerMasterService.caseSetSlotGetHoursAndTimes(actions, chatId, messageId, value, username);
+            case ("setSlotMinute") -> callbackHandlerMasterService.caseSetSlotFinale(actions, chatId, messageId, value, valueTime, username);
             default -> {
                 actions.add(SendMessage.builder()
                         .chatId(chatId)

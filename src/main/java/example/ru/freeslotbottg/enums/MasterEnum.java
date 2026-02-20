@@ -15,7 +15,8 @@ public enum MasterEnum {
             Полезные команды:
             \n
             • <b>Добавлять свободные слоты</b>\n
-              Пример: <code>/slot/2025-12-31/15:00</code>
+              Пример №1: <code>/slot/add</code>\n
+              Пример №2: <code>/slot/2035-12-31/15:00</code>
             \n
             • <b>Удалять лишние слоты</b>\n
               Пример: <code>/slot/delete</code>

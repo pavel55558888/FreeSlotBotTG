@@ -1,7 +1,7 @@
 package example.ru.freeslotbottg.service;
 
 import example.ru.freeslotbottg.cache.UserStateCache;
-import example.ru.freeslotbottg.cache.model.UserStateModel;
+import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
@@ -70,7 +70,7 @@ public class CallbackHandlerUserService {
                     .text(MessageAndCallbackEnum.NO_MASTERS_IN_CATEGORY.getTemplate())
                     .build());
         } else {
-            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+            userStateCache.setCache(chatId, new UserStateCacheModel(value, System.currentTimeMillis()));
             InlineKeyboardMarkup keyboard = keyboardFactory.createKeyboard(masters, "master", Pagination.START_INDEX_PAGE.getTemplate());
             actions.add(SendMessage.builder()
                     .chatId(chatId)
@@ -109,7 +109,7 @@ public class CallbackHandlerUserService {
                     .text(MessageAndCallbackEnum.NO_SLOTS_FOR_MASTER.getTemplate())
                     .build());
         } else {
-            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+            userStateCache.setCache(chatId, new UserStateCacheModel(value, System.currentTimeMillis()));
 
             InlineKeyboardMarkup keyboard
                     = keyboardFactory.buildSlotKeyboard(
@@ -144,7 +144,7 @@ public class CallbackHandlerUserService {
             slot.get().setLastNameClient(lastName);
             updateSlot.updateSlot(slot.get());
 
-            userStateCache.setCache(chatId, new UserStateModel(value, System.currentTimeMillis()));
+            userStateCache.setCache(chatId, new UserStateCacheModel(value, System.currentTimeMillis()));
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)

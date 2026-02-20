@@ -1,7 +1,7 @@
 package example.ru.freeslotbottg.service.pagination;
 
 import example.ru.freeslotbottg.cache.UserStateCache;
-import example.ru.freeslotbottg.cache.model.UserStateModel;
+import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
@@ -34,7 +34,7 @@ public class CallbackHandlerMasterPaginationService {
             return actions;
         }
 
-        Optional<UserStateModel> userStateModel = userStateCache.getCache(chatId);
+        Optional<UserStateCacheModel> userStateModel = userStateCache.getCache(chatId);
         if (userStateModel.isEmpty()){
             return sessionTimeHasExpired.sessionExpired(chatId);
         }
@@ -61,7 +61,7 @@ public class CallbackHandlerMasterPaginationService {
             return actions;
         }
 
-        Optional<UserStateModel> userStateModel = userStateCache.getCache(chatId);
+        Optional<UserStateCacheModel> userStateModel = userStateCache.getCache(chatId);
         if (userStateModel.isEmpty()) {
             return sessionTimeHasExpired.sessionExpired(chatId);
         }

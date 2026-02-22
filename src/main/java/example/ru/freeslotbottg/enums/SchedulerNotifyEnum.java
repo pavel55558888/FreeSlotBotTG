@@ -25,13 +25,7 @@ public enum SchedulerNotifyEnum {
                     "📅 Дата: <b>${date}</b>\n" +
                     "⏰ Время: <b>${time}</b>\n" +
                     "👤 Клиент: <b>${clientFullName}</b>\n" +
-                    "🔖 Telegram: <b>@${telegram}</b>"),
-    NOTIFY_USER_NEW_SLOT(
-            "\uD83D\uDC4B Привет! У мастера, которого вы ранее посещали, появились новые свободные слоты!\n" +
-                    "\uD83D\uDE80 Успей записаться, пока все не заняли.\n\n" +
-                    "\uD83D\uDCCB Информация:\n" +
-                    "🎭 Вид деятельности: <b>${profession}</b>\n" +
-                    "👤 Мастер: <b>${masterFullName}</b>");
+                    "🔖 Telegram: <b>@${telegram}</b>");
 
 
     private final String template;

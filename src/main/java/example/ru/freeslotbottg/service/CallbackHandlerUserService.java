@@ -2,12 +2,8 @@ package example.ru.freeslotbottg.service;
 
 import example.ru.freeslotbottg.cache.UserStateCache;
 import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
-import example.ru.freeslotbottg.database.model.ClientModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
-import example.ru.freeslotbottg.database.service.client.GetClientByUsername;
-import example.ru.freeslotbottg.database.service.client.SetClient;
-import example.ru.freeslotbottg.database.service.client.UpdateClient;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
@@ -43,9 +39,6 @@ public class CallbackHandlerUserService {
     private final UpdateSlot updateSlot;
     private final UserStateCache userStateCache;
     private final CallbackHandlerUserPaginationService callbackHandlerUserPaginationService;
-    private final GetClientByUsername getClientByUsername;
-    private final SetClient setClient;
-    private final UpdateClient updateClient;
 
     public List<BotApiMethod<?>> caseActivity(List<BotApiMethod<?>> actions, long chatId,
                                               int messageId, String value, int page, String prefix) {
@@ -89,12 +82,10 @@ public class CallbackHandlerUserService {
     }
 
     public List<BotApiMethod<?>> caseMaster(List<BotApiMethod<?>> actions, long chatId, int messageId,
-                                            String value, int page, String prefix, String username) {
+                                            String value, int page, String prefix) {
         if (!(page < 0)){
             return callbackHandlerUserPaginationService.caseMasterPagination(actions, chatId, messageId, value, page, prefix);
         }
-
-        StaffModel staffModel = getStaffByFirstNameAndLastName.getStaffByFirstNameAndLastName(value);
 
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
@@ -105,30 +96,12 @@ public class CallbackHandlerUserService {
 
         List<SlotModel> slots = getAllSlotsByStaff
                 .getAllSlotsByStaff(
-                        staffModel,
+                        getStaffByFirstNameAndLastName.getStaffByFirstNameAndLastName(value),
                         true,
                         true,
                         Pagination.START_INDEX_PAGE.getTemplate(),
                         Pagination.PAGE_SIZE.getTemplate()
                 );
-
-        Optional<ClientModel> clientModel = getClientByUsername.getClientByUsername(username);
-
-        if (clientModel.isEmpty()){
-            setClient.setClient(new ClientModel(List.of(staffModel), username, chatId));
-        }else {
-            boolean isSelectedNewMaster =
-                    clientModel.get().getStaffModelList().stream()
-                            .anyMatch(x ->
-                                    value.equals(
-                                            x.getFirstName() + " " + x.getLastName()
-                                    )
-                            );
-            if (isSelectedNewMaster){
-                clientModel.get().getStaffModelList().add(staffModel);
-                updateClient.updateClient(clientModel.get());
-            }
-        }
 
         if (slots.isEmpty()) {
             actions.add(SendMessage.builder()

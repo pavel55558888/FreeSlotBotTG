@@ -3,7 +3,6 @@ package example.ru.freeslotbottg.scheduler;
 import example.ru.freeslotbottg.bot.TelegramBot;
 import example.ru.freeslotbottg.database.model.ClientModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
-import example.ru.freeslotbottg.database.service.client.DeleteClient;
 import example.ru.freeslotbottg.database.service.client.GetClients;
 import example.ru.freeslotbottg.database.service.client.GetClientsCount;
 import example.ru.freeslotbottg.database.service.client.UpdateClient;
@@ -37,16 +36,13 @@ public class DailyReminderScheduler {
     private final GetClientsCount getClientsCount;
     private final GetClients getClients;
     private final UpdateClient updateClient;
-    private final DeleteClient deleteClient;
 
     @Value("${delay.user.notify.hours}")
     private int delayUserNotifyHour;
     @Value("${delay.master.last.activity.hours}")
-    private int delayMasterLastActivityHour;
+    private int delayMasterLastActivity;
     @Value("${batch.size.select.client.db}")
     private int batchSize;
-    @Value("${delete.client.if.last.activity.hour}")
-    private int deleteClientIfLastActivityHour;
 
     @Scheduled(cron = "${scheduler.reminders.crone}")
     private void sendDailyReminders() {
@@ -119,18 +115,12 @@ public class DailyReminderScheduler {
             clientModelList.forEach(client -> {
                 LocalDateTime now = LocalDateTime.now();
 
-                if (client.getLastPushNotifyDate() != null
-                        && client.getLastPushNotifyDate().atStartOfDay().isBefore(now.minusHours(deleteClientIfLastActivityHour))){
-                    deleteClient.deleteClient(client);
-                    return;
-                }
-
                 if (client.getLastPushNotifyDate() == null ||
                         client.getLastPushNotifyDate().atStartOfDay().isBefore(now.minusHours(delayUserNotifyHour))) {
 
                     client.getStaffModelList().forEach(staff -> {
 
-                        if (staff.getLastActivityAddedSlotDate().atStartOfDay().isAfter(now.minusHours(delayMasterLastActivityHour))) {
+                        if (staff.getLastActivityAddedSlotDate().atStartOfDay().isAfter(now.minusHours(delayMasterLastActivity))) {
 
                             client.setLastPushNotifyDate(LocalDate.now());
                             client.setLastPushNotifyTime(LocalTime.now());

@@ -13,5 +13,4 @@ public interface ClientRepo {
     public Optional<ClientModel> getClientByUsername(String username);
     public void updateClient(ClientModel client);
     public long getClientsCount();
-    public void deleteClient(ClientModel client);
 }

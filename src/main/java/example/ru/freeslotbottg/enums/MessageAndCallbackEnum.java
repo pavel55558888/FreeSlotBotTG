@@ -42,6 +42,10 @@ public enum MessageAndCallbackEnum {
                     "📅 Дата: <b>${date}</b>\n" +
                     "⏰ Время: <b>${time}</b>\n"
     ),
+    USER_THX("🎉 Спасибо за оценку! 🎊\n" +
+            "Ваш выбор: <b>${evaluation}</b>"),
+    MASTER_FEEDBACK("👨‍🔧 Клиент <b>@${clientUserName}</b> оценил вашу работу: " +
+            "<b>${evaluation}</b>"),
     SLOT_ALREADY_TAKEN("Кажется у вас из подноса украли запись 🤪 \n Попробуйте выбрать другое время"),
     CANCELLATION_SUCCESS(
             "<b>Ваша запись успешно отменена:</b>\n\n" +

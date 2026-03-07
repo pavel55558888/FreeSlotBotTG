@@ -1,6 +1,8 @@
 package example.ru.freeslotbottg.service;
 
+import example.ru.freeslotbottg.cache.JobEvaluationCache;
 import example.ru.freeslotbottg.cache.UserStateCache;
+import example.ru.freeslotbottg.cache.model.JobEvaluationCacheModel;
 import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.ClientModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
@@ -44,6 +46,7 @@ public class CallbackHandlerUserService {
     private final CallbackHandlerUserPaginationService callbackHandlerUserPaginationService;
     private final GetClientByUserId getClientByUserId;
     private final SetClient setClient;
+    private final JobEvaluationCache jobEvaluationCache;
 
     public List<BotApiMethod<?>> caseActivity(List<BotApiMethod<?>> actions, long chatId,
                                               int messageId, String value, int page, String prefix) {
@@ -76,7 +79,8 @@ public class CallbackHandlerUserService {
                     .build());
         } else {
             userStateCache.setCache(chatId, new UserStateCacheModel(value, System.currentTimeMillis()));
-            InlineKeyboardMarkup keyboard = keyboardFactory.createKeyboard(masters, "master", Pagination.START_INDEX_PAGE.getTemplate());
+            InlineKeyboardMarkup keyboard = keyboardFactory
+                    .createKeyboard(masters, "master", Pagination.START_INDEX_PAGE.getTemplate(), null);
             actions.add(SendMessage.builder()
                     .chatId(chatId)
                     .text(MessageAndCallbackEnum.CHOOSE_MASTER.getTemplate())
@@ -232,6 +236,33 @@ public class CallbackHandlerUserService {
                 .parseMode("HTML")
                 .build());
 
+        return actions;
+    }
+
+    public List<BotApiMethod<?>> caseJobEvaluation(List<BotApiMethod<?>> actions, long chatId, int messageId,
+                                                   String value, String username) {
+        actions.add(EditMessageText.builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .text(MessageAndCallbackEnum.USER_THX.format(Map.of(
+                        "evaluation", value
+                )))
+                .parseMode("HTML")
+                .build());
+
+        Optional<JobEvaluationCacheModel> cache = jobEvaluationCache.getCache(username);
+
+        if (cache.isPresent()) {
+            actions.add(SendMessage.builder()
+                    .chatId(cache.get().getSlotModel().getStaff().getChatId())
+                    .text(MessageAndCallbackEnum.MASTER_FEEDBACK.format(Map.of(
+                            "clientUserName", username,
+                            "evaluation", value
+                    )))
+                    .parseMode("HTML")
+                    .build());
+            jobEvaluationCache.removeCache(username);
+        }
         return actions;
     }
 }

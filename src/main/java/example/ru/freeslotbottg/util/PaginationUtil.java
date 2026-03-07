@@ -30,7 +30,7 @@ public class PaginationUtil {
                 .replyMarkup(
                         isSlots ?
                                 keyboardFactory.buildSlotKeyboard((List<SlotModel>) objectForKeyboard, prefix, page , onlyDateAndTimeDisplay, status)
-                                : keyboardFactory.createKeyboard(objectForKeyboard, prefix, page))
+                                : keyboardFactory.createKeyboard(objectForKeyboard, prefix, page, null))
                 .build());
 
         return actions;

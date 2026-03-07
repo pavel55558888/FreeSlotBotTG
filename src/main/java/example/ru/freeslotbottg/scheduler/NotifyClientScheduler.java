@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,8 +37,9 @@ public class NotifyClientScheduler {
 
     @Scheduled(cron = "${scheduler.notify.crone}")
     private void sendDailyNotify() {
-        log.info("Запуск ежедневного уведомления");
+        log.info("Запуск уведомления о новом слоте");
         Deque<StaffModel> slotQueue = notifyQueueCache.getAllQueue();
+        notifyQueueCache.clearCache();
 
         slotQueue.forEach(staff -> {
             int page = 0;
@@ -77,8 +79,6 @@ public class NotifyClientScheduler {
                 page++;
             } while (!slots.isEmpty());
         });
-
-        notifyQueueCache.clearCache();
     }
 
     public void pushNotify(SlotModel slot) {

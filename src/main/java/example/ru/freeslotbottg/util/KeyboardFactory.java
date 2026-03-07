@@ -17,8 +17,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class KeyboardFactory {
 
-    public InlineKeyboardMarkup createKeyboard(List<?> items, String prefix, int page) {
-        boolean pagination = !(items.size() < 5 && page == 0);
+    public InlineKeyboardMarkup createKeyboard(List<?> items, String prefix, int page, Boolean pagination) {
+        if(pagination == null) {
+            pagination = !(items.size() < 5 && page == 0);
+        }
 
         var rows = items.stream()
                 .map(item -> {

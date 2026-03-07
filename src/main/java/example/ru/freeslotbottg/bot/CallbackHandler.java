@@ -56,6 +56,7 @@ public class CallbackHandler {
             case ("master") -> callbackHandlerUserService.caseMaster(actions, chatId, messageId, value, page, action);
             case ("slot") -> callbackHandlerUserService.caseSlot(actions, chatId, messageId, value, username, firstName, lastName, page, action);
             case ("canceled") -> callbackHandlerUserService.caseCanceled(actions, chatId, messageId, value, firstName, lastName, page, action, username);
+            case ("jobEvaluation") -> callbackHandlerUserService.caseJobEvaluation(actions, chatId, messageId, value, username);
             case ("delete") -> callbackHandlerMasterService.caseDelete(actions, chatId, messageId, value, page, action);
             case ("check_slot") -> callbackHandlerMasterService.caseCheckSlot(actions, chatId, messageId, value, page, action);
             case ("setSlotMonth") -> callbackHandlerMasterService.caseSetSlotGetDays(actions, chatId, messageId, value, username);

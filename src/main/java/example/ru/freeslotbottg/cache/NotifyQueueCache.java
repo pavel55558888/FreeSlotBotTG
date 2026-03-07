@@ -20,8 +20,7 @@ public class NotifyQueueCache {
     }
 
     public Deque<StaffModel> getAllQueue() {
-        log.info("Getting and clear queue");
-        return slotQueue;
+        return new ConcurrentLinkedDeque<>(slotQueue);
     }
 
     public void clearCache() {

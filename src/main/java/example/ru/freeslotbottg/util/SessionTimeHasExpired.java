@@ -32,7 +32,8 @@ public class SessionTimeHasExpired {
                                 true,
                                 Pagination.START_INDEX_PAGE.getTemplate(),
                                 Pagination.PAGE_SIZE.getTemplate()
-                        ), "activity", Pagination.START_INDEX_PAGE.getTemplate()))
+                        ), "activity", Pagination.START_INDEX_PAGE.getTemplate()
+                , null))
                 .build();
 
         return Arrays.asList(sessionExpired, choice);

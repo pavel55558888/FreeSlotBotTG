@@ -20,7 +20,7 @@ public class SlotRemoveCache {
 
     @Scheduled(cron = "${scheduler.remove.cache.slot.crone}")
     private void cleanerCache(){
-        log.info("Запуск часовой очистки кэша");
+        log.info("Запуск часовой очистки кэша добавления слота");
         long now = System.currentTimeMillis();
         long oneHour = TimeUnit.HOURS.toMillis(1);
 

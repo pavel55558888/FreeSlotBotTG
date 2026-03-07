@@ -1,7 +1,6 @@
 package example.ru.freeslotbottg.database.model;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,8 +28,10 @@ public class SlotModel {
     private LocalTime time;
     @Column(nullable = false)
     private boolean isAvailable;
-    @Column(nullable = true)
+    @Column(nullable = false)
     private boolean pushNotify;
+    @Column(nullable = false)
+    private boolean pushJobEvaluation;
 
     public SlotModel(StaffModel staff, LocalDate date, LocalTime time) {
         this.staff = staff;
@@ -38,6 +39,7 @@ public class SlotModel {
         this.time = time;
         this.isAvailable = true;
         this.pushNotify = false;
+        this.pushJobEvaluation = false;
     }
 
     @Override

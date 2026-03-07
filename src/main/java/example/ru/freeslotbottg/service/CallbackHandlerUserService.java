@@ -2,8 +2,11 @@ package example.ru.freeslotbottg.service;
 
 import example.ru.freeslotbottg.cache.UserStateCache;
 import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
+import example.ru.freeslotbottg.database.model.ClientModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
+import example.ru.freeslotbottg.database.service.client.GetClientByUserId;
+import example.ru.freeslotbottg.database.service.client.SetClient;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
 import example.ru.freeslotbottg.database.service.slots.GetSlotById;
@@ -39,6 +42,8 @@ public class CallbackHandlerUserService {
     private final UpdateSlot updateSlot;
     private final UserStateCache userStateCache;
     private final CallbackHandlerUserPaginationService callbackHandlerUserPaginationService;
+    private final GetClientByUserId getClientByUserId;
+    private final SetClient setClient;
 
     public List<BotApiMethod<?>> caseActivity(List<BotApiMethod<?>> actions, long chatId,
                                               int messageId, String value, int page, String prefix) {
@@ -100,7 +105,8 @@ public class CallbackHandlerUserService {
                         true,
                         true,
                         Pagination.START_INDEX_PAGE.getTemplate(),
-                        Pagination.PAGE_SIZE.getTemplate()
+                        Pagination.PAGE_SIZE.getTemplate(),
+                        true
                 );
 
         if (slots.isEmpty()) {
@@ -137,11 +143,15 @@ public class CallbackHandlerUserService {
         Optional<SlotModel> slot = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
         if (slot.isPresent() && slot.get().isAvailable()) {
+            Optional<ClientModel> clientModel = getClientByUserId.getClientByUserId(chatId);
+
+            if (clientModel.isEmpty()) {
+                clientModel = Optional.of(new ClientModel(chatId, username, firstName, lastName));
+                setClient.setClient(clientModel.get());
+            }
+
             slot.get().setAvailable(false);
-            slot.get().setUsernameClient(username);
-            slot.get().setChatId(chatId);
-            slot.get().setFirstNameClient(firstName);
-            slot.get().setLastNameClient(lastName);
+            slot.get().setClient(clientModel.get());
             updateSlot.updateSlot(slot.get());
 
             userStateCache.setCache(chatId, new UserStateCacheModel(value, System.currentTimeMillis()));
@@ -149,7 +159,7 @@ public class CallbackHandlerUserService {
                     .chatId(chatId)
                     .messageId(messageId)
                     .text(MessageAndCallbackEnum.SUCCESS_BOOKING.format(Map.of(
-                            "master", slot.get().getStaffModel().toString(),
+                            "master", slot.get().getStaff().toString(),
                             "date", slot.get().getDate().toString(),
                             "time", slot.get().getTime().toString()
                     )))
@@ -157,7 +167,7 @@ public class CallbackHandlerUserService {
                     .build());
 
             actions.add(SendMessage.builder()
-                    .chatId(slot.get().getStaffModel().getChatId())
+                    .chatId(slot.get().getStaff().getChatId())
                     .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_NEW_BOOKING.format(Map.of(
                             "clientName", firstName + " " + lastName,
                             "username", username != null ? username : "—",
@@ -184,7 +194,7 @@ public class CallbackHandlerUserService {
 
         Optional<SlotModel> slotOpt = Optional.ofNullable(getSlotById.getSlotById(Long.parseLong(value)));
 
-        if (slotOpt.isEmpty()) {
+        if (slotOpt.isEmpty() || slotOpt.get().getClient() == null) {
             actions.add(EditMessageText.builder()
                     .chatId(chatId)
                     .messageId(messageId)
@@ -194,18 +204,17 @@ public class CallbackHandlerUserService {
         }
 
         SlotModel slot = slotOpt.get();
-        String userNameClient = slot.getUsernameClient();
+        String userNameClient = slot.getClient().getUsername();
 
         slot.setAvailable(true);
-        slot.setChatId(0L);
-        slot.setUsernameClient(null);
+        slot.setClient(null);
         updateSlot.updateSlot(slot);
 
         actions.add(EditMessageText.builder()
                 .chatId(chatId)
                 .messageId(messageId)
                 .text(MessageAndCallbackEnum.CANCELLATION_SUCCESS.format(Map.of(
-                        "master", slot.getStaffModel().toString(),
+                        "master", slot.getStaff().toString(),
                         "date", slot.getDate().toString(),
                         "time", slot.getTime().toString()
                 )))
@@ -213,7 +222,7 @@ public class CallbackHandlerUserService {
                 .build());
 
         actions.add(SendMessage.builder()
-                .chatId(slot.getStaffModel().getChatId())
+                .chatId(slot.getStaff().getChatId())
                 .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_CANCELLATION.format(Map.of(
                         "date", slot.getDate().toString(),
                         "time", slot.getTime().toString(),

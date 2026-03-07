@@ -56,7 +56,7 @@ public class KeyboardFactory {
                                     ? slot.getDate().getDayOfMonth() + " "
                                     + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive() + " " + slot.getTime()
                                     + " " + (status ? (slot.isAvailable() ? " -> Свободно" : " -> Занято") : "")
-                                    : slot.getStaffModel().getProfession().getProfession_type() + " -> "
+                                    : slot.getStaff().getProfession().getProfession_type() + " -> "
                                     + slot.getDate().getDayOfMonth() + " "
                                     + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive() + " " + slot.getTime() + "\n";
                     String callbackData = prefix + ":" + slot.getId();

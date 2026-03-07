@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +50,8 @@ public class MessageHandlerMasterService {
                 null,
                 true,
                 Pagination.START_INDEX_PAGE.getTemplate(),
-                Pagination.PAGE_SIZE.getTemplate()
+                Pagination.PAGE_SIZE.getTemplate(),
+                true
         );
 
         if (slotModel.isEmpty()) {
@@ -81,7 +80,8 @@ public class MessageHandlerMasterService {
                 null,
                 true,
                 Pagination.START_INDEX_PAGE.getTemplate(),
-                Pagination.PAGE_SIZE.getTemplate()
+                Pagination.PAGE_SIZE.getTemplate(),
+                true
         );
 
         if (slotModel.isEmpty()) {
@@ -95,35 +95,6 @@ public class MessageHandlerMasterService {
                 .replyMarkup(keyboardFactory.buildSlotKeyboard(slotModel, "delete", Pagination.START_INDEX_PAGE.getTemplate(), true, true))
                 .build();
         return Collections.singletonList(choice);
-    }
-
-    public List<BotApiMethod<?>> caseSetSlot(long chatId, String username, String text) {
-        log.info("Command /slot/*/*");
-
-        String[] url = text.split("/");
-        Optional<StaffModel> staffModel = getStaffByUsername.getStaffByUsername(username);
-
-        if (staffModel.isEmpty()) {
-            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
-        }
-
-        if (url.length != 4) {
-            return builderMessage.buildMessage(MessageAndCallbackEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
-        }
-
-        try {
-            LocalDate date = LocalDate.parse(url[2]);
-            LocalTime time = LocalTime.parse(url[3]);
-            if (date.isBefore(LocalDate.now())) {
-                return builderMessage.buildMessage(MessageAndCallbackEnum.DATE_NOT_PAST.getTemplate(), chatId);
-            }
-
-            setSlot.setSlots(new SlotModel(staffModel.get(), date, time));
-
-        } catch (Exception e) {
-            return builderMessage.buildMessage(MessageAndCallbackEnum.VALIDATE_NEW_SLOT.getTemplate(), chatId);
-        }
-        return builderMessage.buildMessage(MessageAndCallbackEnum.ADD_NEW_SLOT.getTemplate(), chatId);
     }
 
     public List<BotApiMethod<?>> caseMasterInfo(long chatId, String username){

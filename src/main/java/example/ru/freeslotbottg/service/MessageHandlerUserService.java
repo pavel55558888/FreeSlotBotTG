@@ -65,10 +65,10 @@ public class MessageHandlerUserService {
         List<BotApiMethod<?>> actions = new ArrayList<>();
         for (SlotModel slot : slots) {
             String text = MessageAndCallbackEnum.SLOT_DETAILS.format(Map.of(
-                    "profession", slot.getStaffModel().getProfession().getProfession_type(),
+                    "profession", slot.getStaff().getProfession().getProfession_type(),
                     "date", slot.getDate().toString(),
                     "time", slot.getTime().toString(),
-                    "masterFullName", slot.getStaffModel().getFirstName() + " " + slot.getStaffModel().getLastName()
+                    "masterFullName", slot.getStaff().getFirstName() + " " + slot.getStaff().getLastName()
             ));
 
             SendMessage message = SendMessage.builder()

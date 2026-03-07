@@ -1,6 +1,7 @@
 package example.ru.freeslotbottg.database.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,21 +19,21 @@ public class SlotModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @ManyToOne
-    private StaffModel staffModel;
+    private StaffModel staff;
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private ClientModel client;
     @Column(nullable = false)
     private LocalDate date;
     @Column(nullable = false)
     private LocalTime time;
     @Column(nullable = false)
     private boolean isAvailable;
-    private String usernameClient;
-    private String firstNameClient;
-    private String lastNameClient;
-    private long chatId;
+    @Column(nullable = true)
     private boolean pushNotify;
 
-    public SlotModel(StaffModel staffModel, LocalDate date, LocalTime time) {
-        this.staffModel = staffModel;
+    public SlotModel(StaffModel staff, LocalDate date, LocalTime time) {
+        this.staff = staff;
         this.date = date;
         this.time = time;
         this.isAvailable = true;
@@ -41,8 +42,8 @@ public class SlotModel {
 
     @Override
     public String toString() {
-        return "Запись: " + staffModel.getProfession().getProfession_type() + "\n"
+        return "Запись: " + staff.getProfession().getProfession_type() + "\n"
                 + "Время: " + date + " " + time + "\n"
-                + "Мастер: " + staffModel.getFirstName() + " " + staffModel.getLastName();
+                + "Мастер: " + staff.getFirstName() + " " + staff.getLastName();
     }
 }

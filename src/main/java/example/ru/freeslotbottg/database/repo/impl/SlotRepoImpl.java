@@ -18,15 +18,19 @@ public class SlotRepoImpl implements SlotRepo {
     private final EntityManager entityManager;
 
     @Override
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size) {
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size, boolean relevant) {
 
         StringBuilder jpql = new StringBuilder("""
         SELECT s FROM SlotModel s
-        WHERE s.staffModel = :staff
+        WHERE s.staff = :staff
         """);
 
         if (isAvailable != null) {
             jpql.append(" AND s.isAvailable = :isAvailable");
+        }
+
+        if (relevant) {
+            jpql.append(" AND (s.date > :nowDate OR (s.date = :nowDate AND s.time >= :nowTime))");
         }
 
         jpql.append(" ORDER BY s.date, s.time");
@@ -36,6 +40,13 @@ public class SlotRepoImpl implements SlotRepo {
 
         if (isAvailable != null) {
             query.setParameter("isAvailable", isAvailable);
+        }
+
+        if (relevant) {
+            LocalDate nowDate = LocalDate.now();
+            LocalTime nowTime = LocalTime.now();
+            query.setParameter("nowDate", nowDate);
+            query.setParameter("nowTime", nowTime);
         }
 
         if (pagination) {
@@ -65,7 +76,7 @@ public class SlotRepoImpl implements SlotRepo {
     @Override
     public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size) {
         TypedQuery<SlotModel> query = entityManager.createQuery(
-                "SELECT s FROM SlotModel s WHERE s.usernameClient = :username",
+                "SELECT s FROM SlotModel s WHERE s.client.username = :username",
                 SlotModel.class
         ).setParameter("username", username);
 
@@ -77,10 +88,16 @@ public class SlotRepoImpl implements SlotRepo {
 
         return query.getResultList();
     }
-
     @Override
-    public List<SlotModel> getSlots() {
-        return entityManager.createQuery("from SlotModel", SlotModel.class).getResultList();
+    public List<SlotModel> getSlots(boolean isPagination, int page, int size) {
+        var query = entityManager.createQuery("from SlotModel", SlotModel.class);
+
+        if (isPagination) {
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
+        }
+
+        return query.getResultList();
     }
 
     @Override

@@ -17,8 +17,8 @@ public class SlotServiceImpl implements SetSlot, GetAllSlotsByStaff, GetSlotById
     private SlotRepo slotRepo;
 
     @Override
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff,Boolean isAvailable, boolean pagination, int page, int size) {
-        return slotRepo.getAllSlotsByStaff(staff, isAvailable, pagination, page, size);
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff,Boolean isAvailable, boolean pagination, int page, int size, boolean relevant) {
+        return slotRepo.getAllSlotsByStaff(staff, isAvailable, pagination, page, size, relevant);
     }
 
     @Override
@@ -42,8 +42,8 @@ public class SlotServiceImpl implements SetSlot, GetAllSlotsByStaff, GetSlotById
     }
 
     @Override
-    public List<SlotModel> getSlots() {
-        return slotRepo.getSlots();
+    public List<SlotModel> getSlots(boolean isPagination, int page, int size) {
+        return slotRepo.getSlots(isPagination, page, size);
     }
 
     @Override

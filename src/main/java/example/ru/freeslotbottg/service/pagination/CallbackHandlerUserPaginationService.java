@@ -96,7 +96,8 @@ public class CallbackHandlerUserPaginationService {
                         true,
                         true,
                         pageAfterIndexing,
-                        Pagination.PAGE_SIZE.getTemplate()
+                        Pagination.PAGE_SIZE.getTemplate(),
+                        true
                 );
 
         return paginationUtil

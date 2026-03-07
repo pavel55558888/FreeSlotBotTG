@@ -1,5 +1,6 @@
 package example.ru.freeslotbottg.service;
 
+import example.ru.freeslotbottg.cache.NotifyQueueCache;
 import example.ru.freeslotbottg.cache.SlotCache;
 import example.ru.freeslotbottg.cache.model.SlotCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
@@ -40,6 +41,7 @@ public class CallbackHandlerMasterService {
     private final BuilderMessage builderMessage;
     private final GetStaffByUsername getStaffByUsername;
     private final SetSlot setSlots;
+    private final NotifyQueueCache notifyQueueCache;
 
     public List<BotApiMethod<?>> caseDelete(List<BotApiMethod<?>> actions, long chatId,
                                             int messageId, String value, int page, String prefix) {
@@ -63,13 +65,13 @@ public class CallbackHandlerMasterService {
 
         if (!slot.isAvailable()) {
             String messageText = MessageAndCallbackEnum.SLOT_DELETED_NOTIFY.format(Map.of(
-                    "master", slot.getStaffModel().toString(),
+                    "master", slot.getStaff().toString(),
                     "date", slot.getDate().toString(),
                     "time", slot.getTime().toString()
             ));
 
             actions.add(SendMessage.builder()
-                    .chatId(slot.getChatId())
+                    .chatId(slot.getClient().getChatId())
                     .text(messageText)
                     .parseMode("HTML")
                     .build());
@@ -112,8 +114,8 @@ public class CallbackHandlerMasterService {
                     .text(MessageAndCallbackEnum.SLOT_INFO_TAKEN.format(Map.of(
                             "date", slot.getDate().toString(),
                             "time", slot.getTime().toString(),
-                            "clientName", slot.getFirstNameClient() + " " + slot.getLastNameClient(),
-                            "usernameClient", slot.getUsernameClient() != null ? slot.getUsernameClient() : "—"
+                            "clientName", slot.getClient().getFirstName() + " " + slot.getClient().getLastName(),
+                            "usernameClient", slot.getClient().getUsername() != null ? slot.getClient().getUsername() : "—"
                     )))
                     .parseMode("HTML")
                     .build());
@@ -302,6 +304,7 @@ public class CallbackHandlerMasterService {
                 .build());
 
         slotCache.removeCache(username);
+        notifyQueueCache.setCache(staffModel.get());
 
         return actions;
     }

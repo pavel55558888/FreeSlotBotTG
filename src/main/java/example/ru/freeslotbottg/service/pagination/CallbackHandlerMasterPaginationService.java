@@ -45,7 +45,8 @@ public class CallbackHandlerMasterPaginationService {
                 null,
                 true,
                 pageAfterIndexing,
-                Pagination.PAGE_SIZE.getTemplate()
+                Pagination.PAGE_SIZE.getTemplate(),
+                true
         );
 
         return paginationUtil
@@ -72,7 +73,8 @@ public class CallbackHandlerMasterPaginationService {
                 null,
                 true,
                 pageAfterIndexing,
-                Pagination.PAGE_SIZE.getTemplate()
+                Pagination.PAGE_SIZE.getTemplate(),
+                true
         );
 
         return paginationUtil

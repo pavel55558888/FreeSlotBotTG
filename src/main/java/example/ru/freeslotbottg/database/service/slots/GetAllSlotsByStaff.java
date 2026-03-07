@@ -8,5 +8,5 @@ import java.util.List;
 
 @Service
 public interface GetAllSlotsByStaff {
-    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size);
+    public List<SlotModel> getAllSlotsByStaff(StaffModel staff, Boolean isAvailable, boolean pagination, int page, int size, boolean relevant);
 }

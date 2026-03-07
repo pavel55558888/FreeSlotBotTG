@@ -6,6 +6,7 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.profesion.GetAllProfession;
 import example.ru.freeslotbottg.database.service.slots.GetSlotsByUsernameClient;
 import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.MonthEnum;
 import example.ru.freeslotbottg.enums.Pagination;
 import example.ru.freeslotbottg.enums.StartEnums;
 import example.ru.freeslotbottg.util.BuilderMessage;
@@ -67,7 +68,7 @@ public class MessageHandlerUserService {
         for (SlotModel slot : slots) {
             String text = MessageAndCallbackEnum.SLOT_DETAILS.format(Map.of(
                     "profession", slot.getStaff().getProfession().getProfession_type(),
-                    "date", slot.getDate().toString(),
+                    "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                     "time", slot.getTime().toString(),
                     "masterFullName", slot.getStaff().getFirstName() + " " + slot.getStaff().getLastName()
             ));

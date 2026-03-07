@@ -20,9 +20,9 @@ public class ClientModel {
     private long chatId;
     @Column(nullable = false)
     private String username;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String firstName;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String lastName;
     @Column(nullable = true)
     private LocalDate lastPushNotify;

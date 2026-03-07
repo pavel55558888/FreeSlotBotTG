@@ -5,7 +5,6 @@ import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlotsByStaff;
-import example.ru.freeslotbottg.database.service.slots.SetSlot;
 import example.ru.freeslotbottg.database.service.staff.*;
 import example.ru.freeslotbottg.enums.MasterEnum;
 import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
@@ -30,7 +29,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MessageHandlerMasterService {
     private final KeyboardFactory keyboardFactory;
-    private final SetSlot setSlot;
     private final GetStaffByUsername getStaffByUsername;
     private final UpdateStaff updateStaff;
     private final GetAllSlotsByStaff getAllSlotsByStaff;

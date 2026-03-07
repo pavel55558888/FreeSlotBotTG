@@ -6,9 +6,7 @@ import example.ru.freeslotbottg.cache.model.JobEvaluationCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlots;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
-import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
 import example.ru.freeslotbottg.enums.SchedulerJobEvaluation;
-import example.ru.freeslotbottg.enums.SchedulerNotifyEnum;
 import example.ru.freeslotbottg.util.KeyboardFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor

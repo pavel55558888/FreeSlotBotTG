@@ -68,7 +68,7 @@ public enum MessageAndCallbackEnum {
     CHOICE_CANCEL("Выберите запись для отмены:"),
     COMMAND_NOT_FOUND("Данной команды не существует"),
     NEW_PROFESSION("Новый вид деятельности успешно добавлен\n"),
-    NEW_MASTER("Новый мастер успешно добавлен"),
+    NEW_MASTER("Новый мастер успешно добавлен. Для активицаии ему необходимо ввести \"/master\""),
     NOT_FOUND_ADMIN_NEW_MASTER("Неизвестная ошибка: формат /admin/new/master/профессия/username/firstname/lastname"),
     MASTER_NULL("Мастер не найден"),
     DELETE_PROFESSION("Вид деятельности успешно удален\n"),

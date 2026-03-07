@@ -16,6 +16,7 @@ import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
 import example.ru.freeslotbottg.database.service.staff.GetStaffByFirstNameAndLastName;
 import example.ru.freeslotbottg.database.service.staff.GetStaffByProfessionId;
 import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.MonthEnum;
 import example.ru.freeslotbottg.enums.Pagination;
 import example.ru.freeslotbottg.service.pagination.CallbackHandlerUserPaginationService;
 import example.ru.freeslotbottg.util.KeyboardFactory;
@@ -164,7 +165,7 @@ public class CallbackHandlerUserService {
                     .messageId(messageId)
                     .text(MessageAndCallbackEnum.SUCCESS_BOOKING.format(Map.of(
                             "master", slot.get().getStaff().toString(),
-                            "date", slot.get().getDate().toString(),
+                            "date", slot.get().getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.get().getDate().getMonthValue()).getMonthGenitive(),
                             "time", slot.get().getTime().toString()
                     )))
                     .parseMode("HTML")
@@ -175,7 +176,7 @@ public class CallbackHandlerUserService {
                     .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_NEW_BOOKING.format(Map.of(
                             "clientName", firstName + " " + lastName,
                             "username", username != null ? username : "—",
-                            "date", slot.get().getDate().toString(),
+                            "date", slot.get().getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.get().getDate().getMonthValue()).getMonthGenitive(),
                             "time", slot.get().getTime().toString()
                     )))
                     .parseMode("HTML")
@@ -219,7 +220,7 @@ public class CallbackHandlerUserService {
                 .messageId(messageId)
                 .text(MessageAndCallbackEnum.CANCELLATION_SUCCESS.format(Map.of(
                         "master", slot.getStaff().toString(),
-                        "date", slot.getDate().toString(),
+                        "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                         "time", slot.getTime().toString()
                 )))
                 .parseMode("HTML")
@@ -228,7 +229,7 @@ public class CallbackHandlerUserService {
         actions.add(SendMessage.builder()
                 .chatId(slot.getStaff().getChatId())
                 .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_CANCELLATION.format(Map.of(
-                        "date", slot.getDate().toString(),
+                        "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                         "time", slot.getTime().toString(),
                         "clientName", firstName + " " + lastName,
                         "usernameClient", userNameClient != null ? userNameClient : "—"

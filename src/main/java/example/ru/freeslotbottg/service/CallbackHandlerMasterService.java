@@ -66,7 +66,7 @@ public class CallbackHandlerMasterService {
         if (!slot.isAvailable()) {
             String messageText = MessageAndCallbackEnum.SLOT_DELETED_NOTIFY.format(Map.of(
                     "master", slot.getStaff().toString(),
-                    "date", slot.getDate().toString(),
+                    "date",  slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                     "time", slot.getTime().toString()
             ));
 
@@ -112,7 +112,7 @@ public class CallbackHandlerMasterService {
             actions.add(SendMessage.builder()
                     .chatId(chatId)
                     .text(MessageAndCallbackEnum.SLOT_INFO_TAKEN.format(Map.of(
-                            "date", slot.getDate().toString(),
+                            "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                             "time", slot.getTime().toString(),
                             "clientName", slot.getClient().getFirstName() + " " + slot.getClient().getLastName(),
                             "usernameClient", slot.getClient().getUsername() != null ? slot.getClient().getUsername() : "—"
@@ -121,7 +121,7 @@ public class CallbackHandlerMasterService {
                     .build());
         } else {
             Map<String, String> freeSlotReplacements = Map.of(
-                    "date", slot.getDate().toString(),
+                    "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                     "time", slot.getTime().toString()
             );
             actions.add(SendMessage.builder()

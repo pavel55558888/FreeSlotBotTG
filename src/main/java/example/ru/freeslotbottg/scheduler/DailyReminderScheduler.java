@@ -5,6 +5,7 @@ import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.slots.DeleteSlotById;
 import example.ru.freeslotbottg.database.service.slots.GetAllSlots;
 import example.ru.freeslotbottg.database.service.slots.UpdateSlot;
+import example.ru.freeslotbottg.enums.MonthEnum;
 import example.ru.freeslotbottg.enums.SchedulerNotifyEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +75,7 @@ public class DailyReminderScheduler {
                                 "profession", slot.getStaff().getProfession().getProfession_type(),
                                 "masterFullName", slot.getStaff().getFirstName() + " "
                                         + slot.getStaff().getLastName(),
-                                "date", slot.getDate().toString(),
+                                "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                                 "time", slot.getTime().toString()
                         )))
                         .parseMode("HTML")
@@ -87,7 +88,7 @@ public class DailyReminderScheduler {
                                 "profession", slot.getStaff().getProfession().getProfession_type(),
                                 "masterFullName", slot.getStaff().getFirstName() + " "
                                         + slot.getStaff().getLastName(),
-                                "date", slot.getDate().toString(),
+                                "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                                 "time", slot.getTime().toString(),
                                 "clientFullName", slot.getClient().getFirstName() + " " + slot.getClient().getLastName(),
                                 "telegram", slot.getClient().getUsername()

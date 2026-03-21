@@ -16,10 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
@@ -48,12 +45,15 @@ public class NotifyClientScheduler {
             do {
                 slots = getAllSlotsByStaff.getAllSlotsByStaff(
                         staff,
-                        false,
+                        null,
                         true,
                         page,
                         batchSize,
                         false
                 );
+
+                boolean hasAvailable = slots != null && !slots.isEmpty() &&
+                        slots.stream().anyMatch(SlotModel::isAvailable);
 
                 List<SlotModel> uniqueSlots = new ArrayList<>(
                         slots.stream()
@@ -72,7 +72,7 @@ public class NotifyClientScheduler {
                     LocalDate lastPush = slot.getClient().getLastPushNotify();
                     LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
 
-                    if (lastPush == null || !lastPush.isAfter(threeDaysAgo)) {
+                    if (hasAvailable && (lastPush == null || !lastPush.isAfter(threeDaysAgo))) {
                         pushNotify(slot);
                     }
                 }

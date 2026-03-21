@@ -1,21 +1,30 @@
 package example.ru.freeslotbottg.cache;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import example.ru.freeslotbottg.cache.model.JobEvaluationCacheModel;
-import example.ru.freeslotbottg.cache.model.SlotCacheModel;
-import example.ru.freeslotbottg.database.model.SlotModel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Getter
 @Slf4j
 public class JobEvaluationCache {
-    private final Map<String, JobEvaluationCacheModel> jobEvaluationCache = new ConcurrentHashMap<>();
+    @Value("${job.evaluation.cache.max.size}")
+    private int maxSize;
+    @Value("${job.evaluation.cache.max.time.life.hours}")
+    private int maxTimeLife;
+
+    private final Cache<String, JobEvaluationCacheModel> jobEvaluationCache = Caffeine.newBuilder()
+            .maximumSize(maxSize)
+            .expireAfterWrite(maxTimeLife, TimeUnit.HOURS)
+            .recordStats()
+            .build();
 
     public void setCache(String username, JobEvaluationCacheModel jobEvaluationCacheModel) {
         log.info("Setting cache username {} to {}", username, jobEvaluationCacheModel);
@@ -24,11 +33,11 @@ public class JobEvaluationCache {
 
     public Optional<JobEvaluationCacheModel> getCache(String username) {
         log.info("Getting cache username {}", username);
-        return Optional.ofNullable(jobEvaluationCache.get(username));
+        return Optional.ofNullable(jobEvaluationCache.getIfPresent(username));
     }
 
     public void removeCache(String username) {
         log.info("Removing cache username {}", username);
-        jobEvaluationCache.remove(username);
+        jobEvaluationCache.invalidate(username);
     }
 }

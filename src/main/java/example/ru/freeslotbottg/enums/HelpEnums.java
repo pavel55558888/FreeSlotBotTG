@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum HelpEnums {
     HELP_MESSAGE("""
-        <b>В случае плохой работы бота необходимо убедиться, что у вашего аккаунта есть username</b>
+        ⚠️ <b>В случае проблем с ботом убедитесь, что у вашего telegram аккаунта есть username 🆔</b>
         """);
 
     private final String template;

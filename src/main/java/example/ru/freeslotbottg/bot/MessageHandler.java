@@ -33,6 +33,7 @@ public class MessageHandler {
             case ("/start") -> userService.caseStart(chatId, firstName);
             case ("/my_slots") -> userService.caseMySlots(chatId, username);
             case ("/canceled_slot") -> userService.caseCanceledSlot(chatId, username);
+            case ("/help") -> userService.caseHelp(chatId);
             case String s when s.startsWith("/admin/new/master/") -> adminService.caseNewMaster(username, chatId, text);
             case String s when s.startsWith("/admin/delete/master/") -> adminService.caseDeleteMaster(chatId, username, text);
             case ("/admin") -> adminService.caseAdminInfo(chatId, username);

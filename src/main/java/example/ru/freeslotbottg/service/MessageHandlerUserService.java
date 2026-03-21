@@ -5,10 +5,7 @@ import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
 import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.service.profesion.GetAllProfession;
 import example.ru.freeslotbottg.database.service.slots.GetSlotsByUsernameClient;
-import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
-import example.ru.freeslotbottg.enums.MonthEnum;
-import example.ru.freeslotbottg.enums.Pagination;
-import example.ru.freeslotbottg.enums.StartEnums;
+import example.ru.freeslotbottg.enums.*;
 import example.ru.freeslotbottg.util.BuilderMessage;
 import example.ru.freeslotbottg.util.KeyboardFactory;
 import lombok.RequiredArgsConstructor;
@@ -104,6 +101,18 @@ public class MessageHandlerUserService {
                 .build();
 
         return Collections.singletonList(choice);
+    }
+
+    public List<BotApiMethod<?>> caseHelp(long chatId) {
+        log.info("Command /help");
+
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text(HelpEnums.HELP_MESSAGE.getTemplate())
+                .parseMode("HTML")
+                .build();
+
+        return Collections.singletonList(message);
     }
 
 }

@@ -37,8 +37,8 @@ public class SlotServiceImpl implements SetSlot, GetAllSlotsByStaff, GetSlotById
     }
 
     @Override
-    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size) {
-        return slotRepo.getSlotsByUsername(username, pagination, page, size);
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size, boolean onlyFuture) {
+        return slotRepo.getSlotsByUsername(username, pagination, page, size, onlyFuture);
     }
 
     @Override

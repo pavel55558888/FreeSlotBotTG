@@ -12,7 +12,7 @@ public interface SlotRepo {
     public void setSlots(SlotModel slots);
     public SlotModel getSlotById(long id);
     public void updateSlot(SlotModel slot);
-    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size);
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size, boolean onlyFuture);
     public List<SlotModel> getSlots(boolean isPagination, int page, int size);
     public void deleteSlot(SlotModel slotModel);
 

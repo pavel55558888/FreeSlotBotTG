@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -54,7 +55,8 @@ public class MessageHandlerUserService {
                 username,
                 false,
                 0,
-                0
+                0,
+                true
         );
 
         if (slots.isEmpty()) {
@@ -86,7 +88,8 @@ public class MessageHandlerUserService {
                 username,
                 true,
                 Pagination.START_INDEX_PAGE.getTemplate(),
-                Pagination.PAGE_SIZE.getTemplate()
+                Pagination.PAGE_SIZE.getTemplate(),
+                true
         );
 
         if (slots.isEmpty()) {

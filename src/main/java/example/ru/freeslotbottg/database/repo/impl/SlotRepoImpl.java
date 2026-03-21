@@ -74,11 +74,15 @@ public class SlotRepoImpl implements SlotRepo {
     }
 
     @Override
-    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size) {
-        TypedQuery<SlotModel> query = entityManager.createQuery(
-                "SELECT s FROM SlotModel s WHERE s.client.username = :username",
-                SlotModel.class
-        ).setParameter("username", username);
+    public List<SlotModel> getSlotsByUsername(String username, boolean pagination, int page, int size, boolean onlyFuture) {
+        String jpql = "SELECT s FROM SlotModel s WHERE s.client.username = :username";
+
+        if (onlyFuture) {
+            jpql += " AND (s.date > CURRENT_DATE OR (s.date = CURRENT_DATE AND s.time >= CURRENT_TIME))";
+        }
+
+        TypedQuery<SlotModel> query = entityManager.createQuery(jpql, SlotModel.class)
+                .setParameter("username", username);
 
         if (pagination) {
             int offset = page * size;
@@ -88,6 +92,7 @@ public class SlotRepoImpl implements SlotRepo {
 
         return query.getResultList();
     }
+
     @Override
     public List<SlotModel> getSlots(boolean isPagination, int page, int size) {
         var query = entityManager.createQuery("from SlotModel", SlotModel.class);

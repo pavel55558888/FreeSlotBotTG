@@ -3,6 +3,7 @@ package example.ru.freeslotbottg.cache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import example.ru.freeslotbottg.cache.model.UserStateCacheModel;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +21,16 @@ public class UserStateCache {
     @Value("${user.state.cache.max.time.life.hours}")
     private int maxTimeLife;
 
-    private final Cache<Long, UserStateCacheModel> userStateCache = Caffeine.newBuilder()
-            .maximumSize(maxSize)
-            .expireAfterWrite(maxTimeLife, TimeUnit.HOURS)
-            .recordStats()
-            .build();
+    private Cache<Long, UserStateCacheModel> userStateCache;
+
+    @PostConstruct
+    private void init() {
+        userStateCache = Caffeine.newBuilder()
+                .maximumSize(maxSize)
+                .expireAfterWrite(maxTimeLife, TimeUnit.HOURS)
+                .recordStats()
+                .build();
+    }
 
     public void setCache(Long chatId, UserStateCacheModel userState) {
         log.info("Setting cache for chat id {}", chatId);

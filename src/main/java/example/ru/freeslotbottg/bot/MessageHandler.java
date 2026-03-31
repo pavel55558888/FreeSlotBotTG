@@ -36,6 +36,7 @@ public class MessageHandler {
             case ("/help") -> userService.caseHelp(chatId);
             case String s when s.startsWith("/admin/new/master/") -> adminService.caseNewMaster(username, chatId, text);
             case String s when s.startsWith("/admin/delete/master/") -> adminService.caseDeleteMaster(chatId, username, text);
+            case String s when s.startsWith("/admin/send/notify") -> adminService.caseSendNotify(chatId, username, text);
             case ("/admin") -> adminService.caseAdminInfo(chatId, username);
             case ("/slot/all") -> masterService.caseCheckAllSlots(chatId, username);
             case ("/slot/delete") -> masterService.caseDeleteSlot(chatId, username);

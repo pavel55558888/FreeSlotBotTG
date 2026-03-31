@@ -1,13 +1,16 @@
 package example.ru.freeslotbottg.service;
 
 import example.ru.freeslotbottg.database.model.ProfessionModel;
+import example.ru.freeslotbottg.database.model.SlotModel;
 import example.ru.freeslotbottg.database.model.StaffModel;
 import example.ru.freeslotbottg.database.service.profesion.DeleteProfession;
 import example.ru.freeslotbottg.database.service.profesion.GetByProfession;
 import example.ru.freeslotbottg.database.service.profesion.SetProfession;
+import example.ru.freeslotbottg.database.service.slots.GetAllSlots;
 import example.ru.freeslotbottg.database.service.staff.*;
 import example.ru.freeslotbottg.enums.AdminEnum;
 import example.ru.freeslotbottg.enums.MessageAndCallbackEnum;
+import example.ru.freeslotbottg.enums.Pagination;
 import example.ru.freeslotbottg.util.BuilderMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +19,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +33,12 @@ public class MessageHandlerAdminService {
     private final DeleteProfession deleteProfession;
     private final GetStaffByProfessionId getStaffByProfessionId;
     private final BuilderMessage builderMessage;
+    private final GetAllSlots getAllSlots;
 
     @Value("${bot.admin}")
     private String admin;
+    @Value("${batch.size.db.slots.admin.push.notify}")
+    private int batchSize;
 
     public List<BotApiMethod<?>> caseNewMaster(String username, long chatId, String text){
         log.info("Command /admin/new/master/**");
@@ -106,6 +111,41 @@ public class MessageHandlerAdminService {
                 .text(AdminEnum.ADMIN_INFO.getTemplate())
                 .parseMode("HTML")
                 .build());
+    }
+
+    public List<BotApiMethod<?>> caseSendNotify(long chatId, String username, String text) {
+        log.info("Command /admin/send/notify/*");
+
+        if (!username.equals(admin)) {
+            return builderMessage.buildMessage(MessageAndCallbackEnum.COMMAND_NOT_FOUND.getTemplate(), chatId);
+        }
+
+        List<BotApiMethod<?>> apiMethodList = new ArrayList<>();
+        String message = text.replaceFirst("/admin/send/notify/", "");
+        message = message.replace("\\n", "\n");
+
+        List<SlotModel> slots;
+        int page = Pagination.START_INDEX_PAGE.getTemplate();
+        Set<Long> notifiedChatIds = new HashSet<>();
+
+        do {
+            slots = getAllSlots.getSlots(true, page, batchSize);
+
+            for (SlotModel slot : slots) {
+                if (slot.getClient() != null && notifiedChatIds.add(slot.getClient().getChatId())) {
+                    apiMethodList.add(SendMessage.builder()
+                            .chatId(slot.getClient().getChatId())
+                            .text(message)
+                            .parseMode("HTML")
+                            .build());
+                }
+            }
+
+            page++;
+
+        } while (!slots.isEmpty());
+
+        return apiMethodList;
     }
 
     private String capitalize(String str) {

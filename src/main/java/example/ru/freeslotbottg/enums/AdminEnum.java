@@ -15,6 +15,10 @@ public enum AdminEnum {
             • <b>Удалить мастера</b>\n
               Пример: <code>/admin/delete/master/@QvSwmuNxc</code>
             \n
+            • <b>Разослать уведомления всем пользователям, которые были активны не более 3 месяцев назад</b>\n
+              Пример: <code>/admin/send/notify/Всем привет!</code>\n
+              Поддерживает теги &lt;b&gt; и \\n
+            \n
             """);
     private String template;
 }

@@ -90,7 +90,7 @@ public class DailyReminderScheduler {
                                         + slot.getStaff().getLastName(),
                                 "date", slot.getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.getDate().getMonthValue()).getMonthGenitive(),
                                 "time", slot.getTime().toString(),
-                                "clientFullName", slot.getClient().getFirstName() + " " + slot.getClient().getLastName(),
+                                "clientFullName", slot.getClient().getFirstName() + " " + slot.getClient().getLastName() != null ? slot.getClient().getLastName() : "",
                                 "telegram", slot.getClient().getUsername()
                         )))
                         .parseMode("HTML")

@@ -174,7 +174,7 @@ public class CallbackHandlerUserService {
             actions.add(SendMessage.builder()
                     .chatId(slot.get().getStaff().getChatId())
                     .text(MessageAndCallbackEnum.NOTIFICATION_TO_MASTER_NEW_BOOKING.format(Map.of(
-                            "clientName", firstName + " " + lastName,
+                            "clientName", firstName + " " + lastName != null ? lastName : "",
                             "username", username != null ? username : "—",
                             "date", slot.get().getDate().getDayOfMonth() + " " + MonthEnum.getByNumber(slot.get().getDate().getMonthValue()).getMonthGenitive(),
                             "time", slot.get().getTime().toString()

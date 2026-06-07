@@ -70,7 +70,7 @@ public class NotifyClientScheduler {
 
                     if (slot.getClient() == null) continue;
                     LocalDate lastPush = slot.getClient().getLastPushNotify();
-                    LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
+                    LocalDate threeDaysAgo = LocalDate.now().minusDays(7);
 
                     if (hasAvailable && (lastPush == null || !lastPush.isAfter(threeDaysAgo))) {
                         pushNotify(slot);
